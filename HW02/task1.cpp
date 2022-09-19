@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
         return 0;
     }
     size_t N = atoi(argv[1]);
-    float *arr = (float*)calloc( sizeof(float) , N );
-    float *output = (float*)calloc( sizeof(float) , N );
+    float *arr = new float[N];
+    float *output = new float[N];
 
     std::default_random_engine e;
     e.seed(std::chrono::system_clock::now().time_since_epoch().count());
@@ -28,7 +28,8 @@ int main(int argc, char *argv[])
         scan(arr, output, N);
     }
     cout << output[0] << "," << output[N-1] << endl;
-    free(arr);
-    free(output);
+    delete[] arr;
+    delete[] output;
+
 	return 0;
 }
