@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
     if(argc != 3)
     {
-        cout << "Usage ./task6 N M" << endl;
+        cout << "Usage ./task2 N M" << endl;
         return 0;
     }
     size_t N = atoi(argv[1]);

@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 #SBATCH -p wacc
-#SBATCH -c 2
 #SBATCH -J Task1
 #SBATCH -o Task1.out -e Task1.err
 
