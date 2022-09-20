@@ -4,9 +4,9 @@
 
 using namespace std;
 
-int main(int argc, char *argv[])  
+int main(int argc, char *argv[])
 {
-    if(argc != 2)
+    if (argc != 2)
     {
         cout << "Usage ./task1 N" << endl;
         return 0;
@@ -20,16 +20,15 @@ int main(int argc, char *argv[])
     std::uniform_real_distribution<> dis(-1, 1);
     cout << log2(N) << ",";
     for (size_t i = 0; i < N; i++)
-    {
         arr[i] = dis(e);
-    }
+    
     {
         UnitTime u;
         scan(arr, output, N);
     }
-    cout << output[0] << "," << output[N-1] << endl;
+    cout << output[0] << "," << output[N - 1] << endl;
     delete[] arr;
     delete[] output;
 
-	return 0;
+    return 0;
 }
