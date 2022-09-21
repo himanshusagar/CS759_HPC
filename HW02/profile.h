@@ -16,9 +16,8 @@ struct UnitTime
     ~UnitTime()
     {
         auto d = std::chrono::high_resolution_clock::now() - begin;
-        uint64_t countValue = std::chrono::duration_cast<std::chrono::microseconds>(d).count();
-        //std::cout << countValue << ",";
-        std::cout << countValue << std::endl;
+        float countValue = std::chrono::duration_cast<std::chrono::microseconds>(d).count();
+        std::cout << countValue/1000 << std::endl;
     }
 };
 #endif //PROFILE_H
