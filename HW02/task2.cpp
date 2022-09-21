@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     e.seed(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_real_distribution<> image_dis(-10, 10);
     std::uniform_real_distribution<> mask_dis(-1, 1);
-    cout << log2(N) << ",";
+
     for (size_t i = 0; i < N * N; i++)
         image[i] = image_dis(e);
     for (size_t i = 0; i < M * M; i++)
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
         UnitTime u;
         convolve(image, output, N, mask, M);
     }
-    cout << output[0] << "," << output[(N * N) - 1] << endl;
+    cout << output[0] << endl << output[(N * N) - 1] << endl;
 
     delete[] output;
     delete[] image;
