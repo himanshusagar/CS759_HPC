@@ -23,7 +23,6 @@ void mmul2(const double* A, const double* B, double* C, const unsigned int n)
         C[ getIndex(n , i , j) ] += A[ getIndex(n ,i , k) ] * B[ getIndex(n , k , j) ];
     }
 
-    
 }
 
 void mmul3(const double* A, const double* B, double* C, const unsigned int n)
