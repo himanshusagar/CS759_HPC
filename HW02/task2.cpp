@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
         return 0;
     }
     size_t N = atoi(argv[1]);
-    size_t M = atoi(argv[1]);
+    size_t M = atoi(argv[2]);
 
     float *image = new float[N * N];
     float *output = new float[N * N];
@@ -23,6 +23,14 @@ int main(int argc, char *argv[])
     std::uniform_real_distribution<> image_dis(-10, 10);
     std::uniform_real_distribution<> mask_dis(-1, 1);
 
+    // float img[] = {1,3,4,8,
+    //                 6,5,2,4,
+    //                 3,4,6,8,
+    //                 1,4,5,2};
+    // float msk[] = {
+    //                 0, 0, 1,
+    //                 0, 1, 0,
+    //                 1, 0, 0};
     for (size_t i = 0; i < N * N; i++)
         image[i] = image_dis(e);
     for (size_t i = 0; i < M * M; i++)
