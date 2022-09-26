@@ -8,36 +8,36 @@ using std::endl;
 
 __global__ void add(int *a, int *c)
 {
-    c[blockIdx.x] = 1.0;
-    for( int i = 1 ; i <= a[blockIdx.x]; i++)
+    c[threadIdx.x] = 1;
+    for( int i = 1 ; i <= a[threadIdx.x]; i++)
     {
-        c[blockIdx.x] = c[blockIdx.x] * (i);
+        c[threadIdx.x] = c[threadIdx.x] * (i);
     }
-    std::printf("%d!=%d\n" , a[blockIdx.x] , c[blockIdx.x]);
+    std::printf("%d!=%d\n", a[threadIdx.x], c[threadIdx.x] );
 }
 
 int main(void)
 {
     int N = 8;
-    int *a,  *c;       // host copies of a, b, c
-    int *d_a,  *d_c;   // device copies of a, b, c
+    int *a,  *c;       
+    int *d_a,  *d_c;   
     int size = N * sizeof(int);
     cudaError_t cudaStatus;
-    // Alloc space for device copies of a, b, c
+    // Allocate space for device copies of a, b, c
     cudaMalloc((void **)&d_a, size);
     cudaMalloc((void **)&d_c, size);
-    // Alloc space for host copies of a, b, c and setup input values
+    // Allocate space for host copies of a, b, c and setup input values
     a = (int *)malloc(size);
-    for(int i = 0; i < N ; i++)
-    {
-        a[i] = i+1;
-    }
     c = (int *)malloc(size);
 
+    // Fill A array on host
+    for(int i = 0; i < N ; i++)
+        a[i] = i+1;
+    //Copy data from host to device
     cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
-    // Launch add() kernel on GPU with N blocks
-    add<<<N, 1>>>(d_a, d_c);
-
+    // Launch add() kernel on GPU with 1 block and N threads.
+    add<<<1, N>>>(d_a, d_c);
+    // Synchronize and see if we were successful.
     cudaStatus = cudaDeviceSynchronize();
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
@@ -46,11 +46,6 @@ int main(void)
 
     // Copy result back to host
     cudaMemcpy(c, d_c, size, cudaMemcpyDeviceToHost);
-    for(int i = 0; i < N ; i++)
-    {
-        cout << a[i] << " " << c[i] << endl;
-        fflush(stdout);
-    }
     // Cleanup
     free(a);
     free(c);
