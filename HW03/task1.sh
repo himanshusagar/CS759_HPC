@@ -1,9 +1,13 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
-#SBATCH -p wacc
-#SBATCH -J Task1
-#SBATCH -o Task1.out -e Task1.err
+#SBATCH --job-name=Task1
+#SBATCH --partition=wacc
+#SBATCH --time=00-00:02:00
 #SBATCH --gres=gpu:1
+#SBATCH --output=Task1-%j.out
+#SBATCH --error=Task1-%j.err
 
+
+module load nvidia/cuda
 nvcc task1.cu -Xcompiler -O3 -Xcompiler -Wall -Xptxas -O3 -std=c++17 -o task1
 ./task1 
