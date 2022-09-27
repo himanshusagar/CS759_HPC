@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
         return 0;
     }
     int N = std::stoi(argv[1]);
-    int THREAD_COUNT = 128;
+    int THREAD_COUNT = 512;
 
     // Generate Random Values using real dist
     std::random_device entropy_source;
