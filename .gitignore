@@ -88,3 +88,4 @@ dkms.conf
 
 *.vscode
 *.err
+task[0-9]
