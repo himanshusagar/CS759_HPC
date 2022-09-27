@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
         return 0;
     }
     int N = std::stoi(argv[1]);
+    int THREAD_COUNT = 128;
 
     // Generate Random Values using real dist
     std::random_device entropy_source;
@@ -49,11 +50,11 @@ int main(int argc, char *argv[])
     cudaMemcpy(d_b, b, size, cudaMemcpyHostToDevice);
     
     float f_N = N;
-    int block_count = ceil( f_N / 512.0);
+    int block_count = ceil( f_N / THREAD_COUNT);
     // Launch vscale() kernel on GPU with 1 block and N threads.
     {
         UnitGPUTime g;
-        vscale<<<block_count, 512>>>(d_a, d_b, N);
+        vscale<<< block_count, THREAD_COUNT >>>(d_a, d_b, N);
     }
     // Copy result back to host
     cudaStatus = cudaMemcpy(b, d_b, size, cudaMemcpyDeviceToHost);
@@ -65,6 +66,11 @@ int main(int argc, char *argv[])
     //Priting out device filled output
     cout << b[0] << endl << b[N-1] << endl;
     
+    //Priting out device filled output
+    // for(int i=0; i < N ; i++)
+    // {
+    //     cout << b[i] << " ";
+    // }cout<<endl;
     // Cleanup
     free(a);
     free(b);
