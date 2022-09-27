@@ -1,55 +1,74 @@
 #include "cuda.h"
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+#include "vscale.cuh"
+#include "profile.cuh"
+
 #include <iostream>
+#include <string> 
+#include <random>
 
 using std::cout;
 using std::endl;
 
-__global__ void add(int *a, int *c)
-{
-    c[threadIdx.x] = 1;
-    for( int i = 1 ; i <= a[threadIdx.x]; i++)
-    {
-        c[threadIdx.x] = c[threadIdx.x] * (i);
-    }
-    std::printf("%d!=%d\n", a[threadIdx.x], c[threadIdx.x] );
-}
 
-int main(void)
+int main(int argc, char *argv[])
 {
-    int N = 16;
-    int *a,  *c;       
-    int *d_a,  *d_c;   
-    int size = N * sizeof(int);
+    if (argc != 2)
+    {
+        cout << "Usage ./task1 N" << endl;
+        return 0;
+    }
+    int N = std::stoi(argv[1]);
+
+    // Generate Random Values using real dist
+    std::random_device entropy_source;
+	std::mt19937 generator(entropy_source()); 
+	std::uniform_real_distribution<float> dist_10(-10.0, 10.0);
+    std::uniform_real_distribution<float> dist_01(0.0, 1.0);
+
+    float *a,  *b;       
+    float *d_a,  *d_b;   
+    size_t size = N * sizeof(float);
     cudaError_t cudaStatus;
     // Allocate space for device copies of a, b, c
     cudaMalloc((void **)&d_a, size);
-    cudaMalloc((void **)&d_c, size);
+    cudaMalloc((void **)&d_b, size);
     // Allocate space for host copies of a, b, c and setup input values
-    a = (int *)malloc(size);
-    c = (int *)malloc(size);
+    a = (float *)malloc(size);
+    b = (float *)malloc(size);
 
     // Fill A array on host
     for(int i = 0; i < N ; i++)
-        a[i] = i+1;
+    {
+        a[i] = dist_10(generator);
+        b[i] = dist_01(generator);        
+    }
     //Copy data from host to device
     cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
-    // Launch add() kernel on GPU with 1 block and N threads.
-    add<<<1, N>>>(d_a, d_c);
-    // Synchronize and see if we were successful.
-    cudaStatus = cudaDeviceSynchronize();
+    cudaMemcpy(d_b, b, size, cudaMemcpyHostToDevice);
+    
+    float f_N = N;
+    int block_count = ceil( f_N / 512.0);
+    // Launch vscale() kernel on GPU with 1 block and N threads.
+    {
+        UnitGPUTime g;
+        vscale<<<block_count, 512>>>(d_a, d_b, N);
+    }
+    // Copy result back to host
+    cudaStatus = cudaMemcpy(b, d_b, size, cudaMemcpyDeviceToHost);
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
+        fprintf(stderr, "cudaMemcpy returned error code %d after copying from kernel!\n", cudaStatus);
         return 0;
     }
 
-    // Copy result back to host
-    cudaMemcpy(c, d_c, size, cudaMemcpyDeviceToHost);
+    //Priting out device filled output
+    cout << b[0] << endl << b[N-1] << endl;
+    
     // Cleanup
     free(a);
-    free(c);
+    free(b);
     cudaFree(d_a);
-    cudaFree(d_c);
+    cudaFree(d_b);
     return 0;
 }

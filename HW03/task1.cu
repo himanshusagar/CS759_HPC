@@ -31,7 +31,7 @@ int main(void)
         a[i] = i+1;
     //Copy data from host to device
     cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
-    // Launch add() kernel on GPU with 1 block and N threads.
+    // Launch simple kernel on GPU with 1 block and N threads.
     simple_kernel<<<1, N>>>(d_a);
     // Synchronize and see if we were successful.
     cudaStatus = cudaDeviceSynchronize();

@@ -21,6 +21,12 @@ int main(void)
     int *dA;
     int size = N * sizeof(int);
     cudaError_t cudaStatus;
+    // Generate Random Values for kernel
+    std::random_device entropy_source;
+    std::mt19937 generator(entropy_source()); 
+    std::uniform_int_distribution<int> dist(1,1000);
+    int random_num = dist(generator); 
+
     // Allocate space for device and host array a
     cudaMalloc((void **)&dA, size);
     hA = (int *)malloc(size);
@@ -30,8 +36,8 @@ int main(void)
         hA[i] = 0;
     //Copy data from host to device
     cudaMemcpy(dA, hA, size, cudaMemcpyHostToDevice);
-    // Launch add() kernel on GPU with 2 block and 8 threads.
-    simple_kernel<<<2, 8>>>(dA , 10);
+    // Launch simple kernel on GPU with 2 block and 8 threads.
+    simple_kernel<<<2, 8>>>(dA , random_num);
 
    // Copy result back to host
     cudaStatus = cudaMemcpy(hA, dA, size, cudaMemcpyDeviceToHost);
