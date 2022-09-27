@@ -6,7 +6,7 @@
 using std::cout;
 using std::endl;
 
-__global__ void add(int *a)
+__global__ void simple_kernel(int *a)
 {
     int sol = 1;
     for( int i = 1 ; i <= a[threadIdx.x]; i++)
@@ -32,7 +32,7 @@ int main(void)
     //Copy data from host to device
     cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
     // Launch add() kernel on GPU with 1 block and N threads.
-    add<<<1, N>>>(d_a);
+    simple_kernel<<<1, N>>>(d_a);
     // Synchronize and see if we were successful.
     cudaStatus = cudaDeviceSynchronize();
     if (cudaStatus != cudaSuccess) {

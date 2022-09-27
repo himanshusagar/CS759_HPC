@@ -6,12 +6,11 @@
 using std::cout;
 using std::endl;
 
-__global__ void add(int *dA)
+__global__ void simple_kernel(int *dA, int a)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
-    //dA[index] = 1;
-    int sol = threadIdx.x + blockIdx.x;
-    std::printf("%d %d" , index, sol);
+    int sol = a * threadIdx.x + blockIdx.x;
+    dA[index] = sol;
 }
 
 
@@ -25,20 +24,22 @@ int main(void)
     // Allocate space for device and host array a
     cudaMalloc((void **)&dA, size);
     hA = (int *)malloc(size);
+    
     // Fill hA array on host
     for(int i = 0; i < N ; i++)
         hA[i] = 0;
     //Copy data from host to device
     cudaMemcpy(dA, hA, size, cudaMemcpyHostToDevice);
     // Launch add() kernel on GPU with 2 block and 8 threads.
-    add<<<2, 8>>>(dA );
+    simple_kernel<<<2, 8>>>(dA , 10);
+
    // Copy result back to host
     cudaStatus = cudaMemcpy(hA, dA, size, cudaMemcpyDeviceToHost);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy returned error code %d after copying from kernel!\n", cudaStatus);
         return 0;
     }
-
+    //Priting out device filled output
     for(int i=0; i < N ; i++)
     {
         cout << hA[i] << " ";
