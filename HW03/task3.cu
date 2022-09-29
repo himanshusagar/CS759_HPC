@@ -65,12 +65,6 @@ int main(int argc, char *argv[])
 
     //Priting out device filled output
     cout << b[0] << endl << b[N-1] << endl;
-    
-    //Priting out device filled output
-    // for(int i=0; i < N ; i++)
-    // {
-    //     cout << b[i] << " ";
-    // }cout<<endl;
     // Cleanup
     free(a);
     free(b);
