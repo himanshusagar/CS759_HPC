@@ -13,26 +13,36 @@ using std::endl;
 __global__ void matmul_kernel(const float* A, const float* B, float* C, size_t n)
 {
     //Matrix is n * n.
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
+
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    
     //C[index] is what we're solving for.
-    if( index < (n * n) )
+    if(row >= n || col >= n)
+        return;
+    //std::printf(
+        //"blockIdx %d %d blockDim %d %d threadIdx %d %d A[%d][%d] = %f \n"
+        //, blockIdx.x, blockIdx.y , blockDim.x , blockDim.y ,threadIdx.x , threadIdx.y , row, col, A[ row*n + col]);
+
+    float f = 0;
+    int i_index, j_index;
+    for(int k = 0; k < n; k++)
     {
-        float f = 0;
-        for(int k = 0; k < n; k++)
-        {
-            int i_index = blockIdx.x * blockDim.x + k;
-            int j_index = blockIdx.x * k + threadIdx.x;
-            f += A[i_index] * B[j_index];
-        }
-        C[index] = f;    
+        i_index = row * n + k;
+        j_index = k * n + col;
+        f = f + A[i_index] * B[j_index];
     }
+    C[row * n + col] = f;
 }
 
-void matmul(const float* A, const float* B, float* C, size_t n, unsigned int threads_per_block)
+void matmul(const float* A, const float* B, float* C, size_t n, unsigned int block_size)
 {
     // Launch simple kernel on GPU with 2 block and 8 threads.
-    unsigned int block_count =  (n * n + threads_per_block - 1) / threads_per_block;
-    matmul_kernel<<<  block_count, threads_per_block >>>(A, B, C, n);
+    int grid_size = ceil( (float)(n) / (float)block_size );
+    dim3 dim_grid( grid_size , grid_size , 1);
+    dim3 dim_block( block_size, block_size, 1);
+
+    matmul_kernel<<<  dim_grid, dim_block >>>(A, B, C, n);
     // Synchronize and see if we were successful.
     cudaError_t cudaStatus = cudaDeviceSynchronize();
     if (cudaStatus != cudaSuccess) 
