@@ -32,10 +32,10 @@ __global__ void matmul_kernel(const float* A, const float* B, float* C, size_t n
     }
 }
 
-void matmul(const float* A, const float* B, float* C, size_t n, unsigned int block_size)
+void matmul(const float* A, const float* B, float* C, size_t n, unsigned int threads_per_block)
 {
     // Launch simple kernel on GPU with 2 block and 8 threads.
     float f_n = n;
-    int grid_size = ceil(  f_n * ( f_n / (float)block_size ) );
-    matmul_kernel<<<  grid_size, block_size >>>(A, B, C, n);
+    int grid_size = ceil(  f_n * ( f_n / (float)threads_per_block ) );
+    matmul_kernel<<<  grid_size, threads_per_block >>>(A, B, C, n);
 }
