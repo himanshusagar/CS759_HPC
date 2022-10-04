@@ -24,15 +24,13 @@ __global__ void matmul_kernel(const float* A, const float* B, float* C, size_t n
         //"blockIdx %d %d blockDim %d %d threadIdx %d %d A[%d][%d] = %f \n"
         //, blockIdx.x, blockIdx.y , blockDim.x , blockDim.y ,threadIdx.x , threadIdx.y , row, col, A[ row*n + col]);
 
-    float f = 0;
     int i_index, j_index;
     for(int k = 0; k < n; k++)
     {
         i_index = row * n + k;
         j_index = k * n + col;
-        f = f + A[i_index] * B[j_index];
+        C[row * n + col] += A[i_index] * B[j_index];
     }
-    C[row * n + col] = f;
 }
 
 void matmul(const float* A, const float* B, float* C, size_t n, unsigned int block_size)
@@ -43,11 +41,4 @@ void matmul(const float* A, const float* B, float* C, size_t n, unsigned int blo
     dim3 dim_block( block_size, block_size, 1);
 
     matmul_kernel<<<  dim_grid, dim_block >>>(A, B, C, n);
-    // Synchronize and see if we were successful.
-    cudaError_t cudaStatus = cudaDeviceSynchronize();
-    if (cudaStatus != cudaSuccess) 
-    {
-        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
-        return;
-    }
 }
