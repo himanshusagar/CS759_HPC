@@ -11,6 +11,16 @@
 using std::cout;
 using std::endl;
 
+void print_mat(float* p , int n)
+{
+    for(int i = 0 ; i < n ; i++)
+    {
+        for(int j = 0 ; j < n ; j++)
+            cout << p[i * n + j] << " ";
+        cout << endl;
+    }
+}
+
 int main(int argc, char *argv[])
 {
     // if (argc != 3)
@@ -18,9 +28,9 @@ int main(int argc, char *argv[])
     //     cout << "Usage ./task1 n R threads per block" << endl;
     //     return 0;
     // }
-    size_t N = 4; //std::stoi(argv[1]);
-    size_t R = 2; 
-    size_t threads_per_block = 1024;
+    size_t N = 2; //std::stoi(argv[1]);
+    size_t R = 1; 
+    size_t threads_per_block = 8;
 
     float *image, *mask, *output;     
     float *d_image, *d_mask, *d_output;
@@ -53,7 +63,7 @@ int main(int argc, char *argv[])
     {
         mask[i] = dist(generator);
     }
-
+    print_mat(image , N);
 
     //Copy data from host to device
     cudaMemcpy(d_image, image, image_size, cudaMemcpyHostToDevice);
@@ -72,6 +82,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    print_mat(output , N);
     cout << output[N * N - 1] << endl << time_taken << endl;
 
     // Cleanup
