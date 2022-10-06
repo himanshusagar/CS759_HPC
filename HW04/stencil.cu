@@ -68,7 +68,6 @@ __host__ void stencil(const float* image,
     // Launch simple kernel on GPU with 2 block and 8 threads.
     double f_n = n;
     int grid_size = ceil(  f_n * ( f_n / (float)threads_per_block ) );
-    cout << grid_size << " X " << threads_per_block << endl;
     //Mask Size
     //Image Size
     size_t shared_img_size = threads_per_block + R + R;

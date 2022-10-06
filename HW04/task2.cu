@@ -11,51 +11,16 @@
 using std::cout;
 using std::endl;
 
-void print_mat(float* p , int n)
-{
-    for(int i = 0 ; i < n ; i++)
-    {
-        for(int j = 0 ; j < n ; j++)
-            cout << p[i * n + j] << " ";
-        cout << endl;
-    }
-}
-
-void cpu_stencil(const float* image ,const float* mask , float* out_cpu, int N, int R)
-{
-    float img_val;
-    int neg_R = (int)R * -1;
-    int pos_R = R;
-    for(int p = 0 ; p < N ; p++)
-    {
-        for(int q = 0; q < N; q++)
-        {
-            int i = p * N + q;
-            out_cpu[i] = 0;
-            for(int j = neg_R ; j <= pos_R ; j++ )
-            {            
-                int i_j = i + j;
-
-                if( (0 <= i_j) && (i_j < N*N) )
-                    img_val = image[i_j];
-                else
-                    img_val = 1.0;
-                out_cpu[i] += img_val * mask[j + R];
-            }
-        }
-    }
-}
-
 int main(int argc, char *argv[])
 {
-    // if (argc != 3)
-    // {
-    //     cout << "Usage ./task1 n R threads per block" << endl;
-    //     return 0;
-    // }
-    size_t N = 5; //std::stoi(argv[1]);
-    size_t R = 2; 
-    size_t threads_per_block = 8;
+    if (argc != 4)
+    {
+        cout << "Usage ./task1 n R threads per block" << endl;
+        return 0;
+    }
+    size_t N = std::stoi(argv[1]);
+    size_t R = std::stoi(argv[2]);
+    size_t threads_per_block = std::stoi(argv[3]);
 
     float *image, *mask, *output;     
     float *d_image, *d_mask, *d_output;
@@ -81,14 +46,13 @@ int main(int argc, char *argv[])
     // Fill a, b, c array on host
     for(size_t i = 0; i < N * N ; i++)
     {
-        image[i] = i;
+        image[i] = dist(generator);
         output[i] = 0;
     }
     for(size_t i = 0; i < (2 * R + 1) ; i++)
     {
-        mask[i] = 1;
+        mask[i] = dist(generator);;
     }
-    print_mat(image , N);
 
     //Copy data from host to device
     cudaMemcpy(d_image, image, image_size, cudaMemcpyHostToDevice);
@@ -107,23 +71,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    print_mat(output , N);
-    cout << output[N * N - 1] << endl << time_taken << endl;
-
-    float* out_cpu = (float *)malloc(image_size);;
-    cpu_stencil(image , mask , out_cpu , N , R);
-
-    for(size_t i = 0 ; i < N*N ; i++)
-    {
-        if( abs( out_cpu[i] - output[i] ) > 1e-5 )
-        {
-            cout << "Diff at " << i << " C:" <<  out_cpu[i] << " G:" <<  output[i] << endl;
-            break;
-        }
-
-    }
-    print_mat(out_cpu , N);
-
+    cout << output[N * N - 1] << "," << std::log2(N) << "," << time_taken << endl;
 
     // Cleanup
     free(image);
