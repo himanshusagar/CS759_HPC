@@ -30,9 +30,10 @@ void cpu_stencil(const float* image ,const float* mask , float* out_cpu, int N, 
     {
         for(int q = 0; q < N; q++)
         {
+            int i = p * N + q;
+            out_cpu[i] = 0;
             for(int j = neg_R ; j <= pos_R ; j++ )
-            {
-                int i = p * N + q;
+            {            
                 int i_j = i + j;
 
                 if( (0 <= i_j) && (i_j < N*N) )
