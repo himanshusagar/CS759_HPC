@@ -21,6 +21,30 @@ void print_mat(float* p , int n)
     }
 }
 
+void cpu_stencil(const float* image ,const float* mask , float* out_cpu, int N, int R)
+{
+    float img_val;
+    int neg_R = (int)R * -1;
+    int pos_R = R;
+    for(int p = 0 ; p < N ; p++)
+    {
+        for(int q = 0; q < N; q++)
+        {
+            for(int j = neg_R ; j <= pos_R ; j++ )
+            {
+                int i = p * N + q;
+                int i_j = i + j;
+
+                if( (0 <= i_j) && (i_j < N*N) )
+                    img_val = image[i_j];
+                else
+                    img_val = 1.0;
+                out_cpu[i] += img_val * mask[j + R];
+            }
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
     // if (argc != 3)
@@ -28,8 +52,8 @@ int main(int argc, char *argv[])
     //     cout << "Usage ./task1 n R threads per block" << endl;
     //     return 0;
     // }
-    size_t N = 2; //std::stoi(argv[1]);
-    size_t R = 1; 
+    size_t N = 4; //std::stoi(argv[1]);
+    size_t R = 2; 
     size_t threads_per_block = 8;
 
     float *image, *mask, *output;     
@@ -56,12 +80,12 @@ int main(int argc, char *argv[])
     // Fill a, b, c array on host
     for(size_t i = 0; i < N * N ; i++)
     {
-        image[i] = dist(generator);
+        image[i] = i;
         output[i] = 0;
     }
     for(size_t i = 0; i < (2 * R + 1) ; i++)
     {
-        mask[i] = dist(generator);
+        mask[i] = 1;
     }
     print_mat(image , N);
 
@@ -84,6 +108,21 @@ int main(int argc, char *argv[])
 
     print_mat(output , N);
     cout << output[N * N - 1] << endl << time_taken << endl;
+
+    float* out_cpu = (float *)malloc(image_size);;
+    cpu_stencil(image , mask , out_cpu , N , R);
+
+    for(size_t i = 0 ; i < N*N ; i++)
+    {
+        if( abs( out_cpu[i] - output[i] ) > 1e-5 )
+        {
+            cout << "Diff at " << i << " C:" <<  out_cpu[i] << " G:" <<  output[i] << endl;
+            break;
+        }
+
+    }
+    print_mat(out_cpu , N);
+
 
     // Cleanup
     free(image);
