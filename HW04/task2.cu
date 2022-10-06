@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     //     cout << "Usage ./task1 n R threads per block" << endl;
     //     return 0;
     // }
-    size_t N = 4; //std::stoi(argv[1]);
+    size_t N = 5; //std::stoi(argv[1]);
     size_t R = 2; 
     size_t threads_per_block = 8;
 

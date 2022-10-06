@@ -34,7 +34,7 @@ __global__ void stencil_kernel(const float* image, const float* mask, float* out
     //Load portion of shared memory for image
     float* sharedImg = g_shared_mem + sharedMaskSize;    
     int beginIndex = blockIdx.x * blockDim.x - R;
-    int endIndex = beginIndex + blockDim.x + R; // Highest Thread Index of Block.
+    int endIndex = beginIndex + blockDim.x + R + 1; // Highest Thread Index of Block.
     for(int l = beginIndex , k = 0 ; l <= endIndex ; l++ , k++)
     {
         if( ( 0 <= l ) && ( l <= sq_n_1 ) )
@@ -52,9 +52,9 @@ __global__ void stencil_kernel(const float* image, const float* mask, float* out
     }
 
     __syncthreads();
-    std::printf(
-        "blockIdx %d blockDim %d threadIdx %d output[%d] = %f , beginIndex %d , endIndex %d \n"
-        , blockIdx.x , blockDim.x, threadIdx.x , i,  output[i], beginIndex, endIndex );
+    // std::printf(
+    //     "blockIdx %d blockDim %d threadIdx %d output[%d] = %f , beginIndex %d , endIndex %d \n"
+    //     , blockIdx.x , blockDim.x, threadIdx.x , i,  output[i], beginIndex, endIndex );
 
 }
 
