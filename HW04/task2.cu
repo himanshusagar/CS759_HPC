@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 
     float *image, *mask, *output;     
     float *d_image, *d_mask, *d_output;
-    size_t image_size = N * N * sizeof(float);
+    size_t image_size = N * sizeof(float);
     size_t mask_size = (2 * R + 1) * sizeof(float);
     
 
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     output = (float *)malloc(image_size);
     
     // Fill a, b, c array on host
-    for(size_t i = 0; i < N * N ; i++)
+    for(size_t i = 0; i < N ; i++)
     {
         image[i] = dist(generator);
         output[i] = 0;
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    cout << output[N * N - 1] << "," << std::log2(N) << "," << time_taken << endl;
+    cout << output[N - 1] << "," << std::log2(N) << "," << time_taken << endl;
 
     // Cleanup
     free(image);
