@@ -41,7 +41,7 @@ __global__ void stencil_kernel(const float* image, const float* mask, float* out
     int sharedImgSize = localEndIndex - localBeginIndex + 1;
     
     //Fill My Location;
-    sharedImg[threadIdx.x + pos_R] = image[globalIndex];
+    sharedImg[threadIdx.x + pos_R] = globalIndex <= n_1 ? image[globalIndex] : 1.0;
     if(threadIdx.x < pos_R)
     {
         //Fill Left Size
@@ -56,10 +56,11 @@ __global__ void stencil_kernel(const float* image, const float* mask, float* out
             sharedImg[pos_R + blockDim.x + threadIdx.x ] = 1.0;
     }
 
-    __syncthreads(); // Mask and SharedImg are filled now.
 
     if(globalIndex >= n)
         return;
+
+    __syncthreads(); // Mask and SharedImg are filled now.
 
     float *outputSharedMem = g_shared_mem + sharedMaskSize + sharedImgSize;
     for(int j = neg_R ; j <= pos_R ; j++ )
@@ -72,10 +73,10 @@ __global__ void stencil_kernel(const float* image, const float* mask, float* out
 
     //output[globalIndex] = outputSharedMem[ threadIdx.x ];
 
-    std::printf(
-        "blockIdx %d blockDim %d threadIdx %d output[%d] = %f , beginIndex %d , endIndex %d ,  %f %f \n"
-        , blockIdx.x , blockDim.x, threadIdx.x , globalIndex,  output[globalIndex],  R + threadIdx.x  ,  R + blockDim.x + threadIdx.x 
-        , sharedImg[ pos_R + threadIdx.x ], image[ blockIdx.x * blockDim.x + threadIdx.x ] );
+    // std::printf(
+    //     "blockIdx %d blockDim %d threadIdx %d output[%d] = %f , beginIndex %d , endIndex %d ,  %f %f \n"
+    //     , blockIdx.x , blockDim.x, threadIdx.x , globalIndex,  output[globalIndex],  R + threadIdx.x  ,  R + blockDim.x + threadIdx.x 
+    //     , sharedImg[ pos_R + threadIdx.x ], image[ blockIdx.x * blockDim.x + threadIdx.x ] );
 
 }
 
