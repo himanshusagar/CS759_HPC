@@ -62,17 +62,17 @@ int main(int argc, char *argv[])
     image = (float *)malloc(image_size);
     mask = (float *)malloc(mask_size);
     output = (float *)malloc(image_size);
-    float* out_cpu = (float *)malloc(image_size);
+    //float* out_cpu = (float *)malloc(image_size);
     
     // Fill a, b, c array on host
     for(size_t i = 0; i < N ; i++)
     {
-        image[i] = i;
+        image[i] = dist(generator);
         output[i] = 0;
     }
     for(size_t i = 0; i < (2 * R + 1) ; i++)
     {
-        mask[i] = 1;
+        mask[i] = dist(generator);
     }
 
     //Copy data from host to device
@@ -94,15 +94,15 @@ int main(int argc, char *argv[])
 
     cout << output[N - 1] << "," << std::log2(N) << "," << time_taken << endl;
 
-    cpu_stencil(image , mask ,out_cpu, N,  R);
-    for(size_t i = 0 ; i < N ; i++)
-    {
-        if( abs( out_cpu[i] - output[i] ) > 1e-5 )
-        {
-            cout << "Diff at " << i << " C:" <<  out_cpu[i] << " G:" <<  output[i] << endl;
-            //break;
-        }
-    }
+    // cpu_stencil(image , mask ,out_cpu, N,  R);
+    // for(size_t i = 0 ; i < N ; i++)
+    // {
+    //     if( abs( out_cpu[i] - output[i] ) > 1e-5 )
+    //     {
+    //         cout << "Diff at " << i << " C:" <<  out_cpu[i] << " G:" <<  output[i] << endl;
+    //         //break;
+    //     }
+    // }
 
     // Cleanup
     free(image);
