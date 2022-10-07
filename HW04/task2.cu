@@ -11,6 +11,26 @@
 using std::cout;
 using std::endl;
 
+void cpu_stencil(const float* image ,const float* mask , float* out_cpu, int N, int R)
+{
+    float img_val;
+    int pos_R = R;
+    int neg_R = pos_R * -1;
+    for(int i = 0 ; i < N ; i++)
+    {
+        out_cpu[i] = 0;
+        for(int j = neg_R ; j <= pos_R ; j++ )
+        {
+            int i_j = i + j;
+            if( (0 <= i_j) && (i_j < N) )
+                img_val = image[i_j];
+            else
+                img_val = 1.0;
+            out_cpu[i] += img_val * mask[j + R];
+            
+        }
+    }
+}
 int main(int argc, char *argv[])
 {
     if (argc != 4)
@@ -42,16 +62,17 @@ int main(int argc, char *argv[])
     image = (float *)malloc(image_size);
     mask = (float *)malloc(mask_size);
     output = (float *)malloc(image_size);
+    float* out_cpu = (float *)malloc(image_size);
     
     // Fill a, b, c array on host
     for(size_t i = 0; i < N ; i++)
     {
-        image[i] = dist(generator);
+        image[i] = i;
         output[i] = 0;
     }
     for(size_t i = 0; i < (2 * R + 1) ; i++)
     {
-        mask[i] = dist(generator);;
+        mask[i] = 1;
     }
 
     //Copy data from host to device
@@ -72,6 +93,16 @@ int main(int argc, char *argv[])
     }
 
     cout << output[N - 1] << "," << std::log2(N) << "," << time_taken << endl;
+
+    cpu_stencil(image , mask ,out_cpu, N,  R);
+    for(size_t i = 0 ; i < N ; i++)
+    {
+        if( abs( out_cpu[i] - output[i] ) > 1e-5 )
+        {
+            cout << "Diff at " << i << " C:" <<  out_cpu[i] << " G:" <<  output[i] << endl;
+            break;
+        }
+    }
 
     // Cleanup
     free(image);
