@@ -11,6 +11,7 @@
 using std::cout;
 using std::endl;
 
+// Used for bonus question of Q2.
 void cpu_stencil(const float* image ,const float* mask , float* out_cpu, int N, int R)
 {
     float img_val;
@@ -38,6 +39,7 @@ int main(int argc, char *argv[])
         cout << "Usage ./task1 n R threads per block" << endl;
         return 0;
     }
+    //Prepare variable for calculations
     size_t N = std::stoi(argv[1]);
     size_t R = std::stoi(argv[2]);
     size_t threads_per_block = std::stoi(argv[3]);
@@ -47,7 +49,6 @@ int main(int argc, char *argv[])
     size_t image_size = N * sizeof(float);
     size_t mask_size = (2 * R + 1) * sizeof(float);
     
-
     cudaError_t cudaStatus;
     // Generate Random Values for kernel
     std::random_device entropy_source;
@@ -62,7 +63,7 @@ int main(int argc, char *argv[])
     image = (float *)malloc(image_size);
     mask = (float *)malloc(mask_size);
     output = (float *)malloc(image_size);
-    //float* out_cpu = (float *)malloc(image_size);
+    float* out_cpu = (float *)malloc(image_size);
     
     // Fill a, b, c array on host
     for(size_t i = 0; i < N ; i++)
@@ -91,17 +92,13 @@ int main(int argc, char *argv[])
         fprintf(stderr, "cudaMemcpy returned error code %d after copying from kernel!\n", cudaStatus);
         return 0;
     }
+    //Print last element and time taken.
+    cout << output[N - 1] << endl << time_taken << endl;
 
-    cout << output[N - 1] << "," << std::log2(N) << "," << time_taken << endl;
-
-    // cpu_stencil(image , mask ,out_cpu, N,  R);
-    // for(size_t i = 0 ; i < N ; i++)
-    // {
-    //     if( abs( out_cpu[i] - output[i] ) > 1e-5 )
-    //     {
-    //         cout << "Diff at " << i << " C:" <<  out_cpu[i] << " G:" <<  output[i] << endl;
-    //         //break;
-    //     }
+    // CPU Calculation for bonus of Q2.
+    //{ 
+    //     UnitCPUTime c;
+    //     cpu_stencil(image , mask ,out_cpu, N,  R);
     // }
 
     // Cleanup

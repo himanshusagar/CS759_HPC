@@ -2,6 +2,7 @@
 #define PROFILE_H
 
 #include <iostream>
+#include <chrono>
 #include "cuda.h"
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
@@ -22,6 +23,18 @@ struct UnitGPUTime
         float ms = 0;
         cudaEventElapsedTime(&ms, start, stop);
         return ms;
+    }
+};
+
+struct UnitCPUTime
+{
+    std::chrono::high_resolution_clock::time_point begin;
+    UnitCPUTime() : begin(std::chrono::high_resolution_clock::now()) { }
+    ~UnitCPUTime()
+    {
+        auto d = std::chrono::high_resolution_clock::now() - begin;
+        float countValue = std::chrono::duration_cast<std::chrono::microseconds>(d).count();
+        std::cout << countValue/1000 << std::endl;
     }
 };
 

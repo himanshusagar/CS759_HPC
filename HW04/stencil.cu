@@ -68,8 +68,6 @@ __global__ void stencil_kernel(const float* image, const float* mask, float* out
 
     __syncthreads(); // Mask and SharedImg are filled now.
 
- 
-
     float *outputSharedMem = g_shared_mem + sharedMaskSize + sharedImgSize;
     outputSharedMem[ threadIdx.x ] = 0;
     for(int j = neg_R ; j <= pos_R ; j++ )
@@ -105,10 +103,11 @@ __host__ void stencil(const float* image,
     // Launch simple kernel on GPU with 2 block and 8 threads.
     double f_n = n;
     int grid_size = ceil( f_n / (float)threads_per_block );
-    //Mask Size
     //Image Size
     size_t shared_img_size = threads_per_block + R + R + 1;
+    //Output Size
     size_t shared_out_size = threads_per_block;
     size_t shared_mem_size = ( (2 * R + 1) + shared_img_size + shared_out_size ) * sizeof(float);
+    // Call Kernel
     stencil_kernel<<<  grid_size, threads_per_block, shared_mem_size >>>(image, mask, output, n , R);
 }
