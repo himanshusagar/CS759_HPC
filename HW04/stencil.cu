@@ -16,9 +16,6 @@ __global__ void stencil_kernel(const float* image, const float* mask, float* out
     //Matrix is n * n.
     int globalIndex = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if(globalIndex >= n)
-        return;
-
     extern __shared__ float g_shared_mem[];
 
     // Prepare variables for loops.
@@ -28,7 +25,7 @@ __global__ void stencil_kernel(const float* image, const float* mask, float* out
 
     //Load portion of shared memory for mask
     float *sharedMask = g_shared_mem;
-    int sharedMaskSize = 2 * R + 1;
+    int sharedMaskSize = 2 * pos_R + 1;
     //We're given that 
     //block size >= 2 * R + 1;
     //For Mask, local Index is global Index.
@@ -44,37 +41,41 @@ __global__ void stencil_kernel(const float* image, const float* mask, float* out
     int sharedImgSize = localEndIndex - localBeginIndex + 1;
     
     //Fill My Location;
-    sharedImg[threadIdx.x + R] = image[globalIndex];
-    if(threadIdx.x < R)
+    sharedImg[threadIdx.x + pos_R] = image[globalIndex];
+    if(threadIdx.x < pos_R)
     {
         //Fill Left Size
         if( globalIndex - pos_R  >= 0)
-            sharedImg[threadIdx.x] = image[globalIndex - R];
+            sharedImg[threadIdx.x] = image[globalIndex - pos_R];
         else
             sharedImg[threadIdx.x] = 1.0;
         //Fill Right Side
-        if( globalIndex + R  <= n_1)
-            sharedImg[R + blockDim.x + threadIdx.x ] = image[globalIndex + blockDim.x];
+        if( globalIndex + pos_R  <= n_1)
+            sharedImg[pos_R + blockDim.x + threadIdx.x ] = image[globalIndex + blockDim.x];
         else
-            sharedImg[R + blockDim.x + threadIdx.x ] = 1.0;
+            sharedImg[pos_R + blockDim.x + threadIdx.x ] = 1.0;
     }
 
     __syncthreads(); // Mask and SharedImg are filled now.
+
+    if(globalIndex >= n)
+        return;
 
     float *outputSharedMem = g_shared_mem + sharedMaskSize + sharedImgSize;
     for(int j = neg_R ; j <= pos_R ; j++ )
     {
         //Local's -R is 
-        int sImgIndex = threadIdx.x + R + j;
-        output[globalIndex] += sharedImg[ sImgIndex ] * sharedMask[j + R];
+        int sImgIndex = threadIdx.x + pos_R + j;
+        output[globalIndex] += sharedImg[ sImgIndex ] * sharedMask[j + pos_R];
         //outputSharedMem[ threadIdx.x ] += sharedImg[ sImgIndex ] * sharedMask[j + R];   
     }
 
     //output[globalIndex] = outputSharedMem[ threadIdx.x ];
 
     std::printf(
-        "blockIdx %d blockDim %d threadIdx %d output[%d] = %f , beginIndex %d , endIndex %d \n"
-        , blockIdx.x , blockDim.x, threadIdx.x , globalIndex,  output[globalIndex],  R + threadIdx.x  ,  R + blockDim.x + threadIdx.x );
+        "blockIdx %d blockDim %d threadIdx %d output[%d] = %f , beginIndex %d , endIndex %d ,  %f %f \n"
+        , blockIdx.x , blockDim.x, threadIdx.x , globalIndex,  output[globalIndex],  R + threadIdx.x  ,  R + blockDim.x + threadIdx.x 
+        , sharedImg[ pos_R + threadIdx.x ], image[ blockIdx.x * blockDim.x + threadIdx.x ] );
 
 }
 

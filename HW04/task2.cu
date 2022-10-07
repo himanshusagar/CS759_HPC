@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
         if( abs( out_cpu[i] - output[i] ) > 1e-5 )
         {
             cout << "Diff at " << i << " C:" <<  out_cpu[i] << " G:" <<  output[i] << endl;
-            break;
+            //break;
         }
     }
 
