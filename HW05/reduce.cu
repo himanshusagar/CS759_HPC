@@ -44,7 +44,8 @@ __host__ void reduce(float **input, float **output, unsigned int N,
         return;
    
     // Call Kernel
-    reduce_kernel<<<  grid_size, threads_per_block, shared_mem_size >>>(*input, *output, N);
+    reduce_kernel<<<  grid_size, threads_per_block, shared_mem_size >>>( *input, *output , N);
+    cudaDeviceSynchronize();
     // Now grid size number of threads are left.
     // Now output is input
    // reduce(output , input, grid_size / array_size_per_block , threads_per_block);

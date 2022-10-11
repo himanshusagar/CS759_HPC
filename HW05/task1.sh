@@ -10,5 +10,5 @@
 module load nvidia/cuda
 nvcc task1.cu reduce.cu -Xcompiler -O3 -Xcompiler -Wall -Xptxas -O3 -std c++17 -o task1
 
-./task1 8 4
+./task1 16 2
 

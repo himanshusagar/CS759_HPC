@@ -27,8 +27,6 @@ int main(int argc, char *argv[])
     float *d_input, *d_output;
     size_t size = N * sizeof(float);
     
-    
-    cudaError_t cudaStatus;
     // Generate Random Values for kernel
     std::random_device entropy_source;
     std::mt19937 generator(entropy_source()); 
@@ -36,7 +34,9 @@ int main(int argc, char *argv[])
     
     // Allocate space for device and host array a
     cudaMalloc((void **)&d_input, size);
+    cudaCheckError();
     cudaMalloc((void **)&d_output, size);
+    cudaCheckError();
     
     input = (float *)malloc(size);
     output = (float *)malloc(size);
@@ -50,7 +50,10 @@ int main(int argc, char *argv[])
 
     //Copy data from host to device
     cudaMemcpy(d_input, input, size, cudaMemcpyHostToDevice);
+    cudaCheckError();
     cudaMemcpy(d_output, output, size, cudaMemcpyHostToDevice);
+    cudaCheckError();
+
     float time_taken = 0;
     {
         UnitGPUTime g;
@@ -58,13 +61,10 @@ int main(int argc, char *argv[])
         time_taken = g.getTime();
     }
     // Copy result back to host
-    cudaStatus = cudaMemcpy(output, d_output, size, cudaMemcpyDeviceToHost);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy returned error code %d after copying from kernel!\n", cudaStatus);
-        return 0;
-    }
+    cudaMemcpy(output, d_output, size, cudaMemcpyDeviceToHost);
+    cudaCheckError();
     //Print last element and time taken.
-    cout << "Output :";
+    cout << "Output : ";
     for(size_t i = 0; i < N ; i++)
     {
         cout << output[i] << " ";
