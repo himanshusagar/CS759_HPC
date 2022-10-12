@@ -12,6 +12,16 @@ using std::cout;
 using std::endl;
 
 
+void printX(float *val, int N)
+{
+    std::cout << "Array : " << std::endl;
+    for(int i = 0; i < N ; i++)
+    {
+        std::cout << val[i] << " ";
+    }
+    std::cout << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
     if (argc != 3)
@@ -63,15 +73,13 @@ int main(int argc, char *argv[])
     // Copy result back to host
     cudaMemcpy(output, d_output, size, cudaMemcpyDeviceToHost);
     cudaCheckError();
+    cudaMemcpy(input, d_input, size, cudaMemcpyDeviceToHost);
+    cudaCheckError();
     //Print last element and time taken.
-    cout << "Output : ";
-    for(size_t i = 0; i < N ; i++)
-    {
-        cout << output[i] << " ";
-    }
-    cout << endl;
-
-    cout << output[0] << endl << time_taken << endl;
+    // printX(input, N);
+    // printX(output, N);
+    
+    cout << std::log2(N) << "," << time_taken << endl;
 
     // Cleanup
     free(input);

@@ -12,3 +12,10 @@ nvcc task1.cu reduce.cu -Xcompiler -O3 -Xcompiler -Wall -Xptxas -O3 -std c++17 -
 
 ./task1 16 2
 
+# begin=$((2**10))
+# end=$((2**30))
+
+# for (( i=$begin ; i<=$end ; i=i*2 )); 
+# do
+#     ./task1 $i 1024
+# done

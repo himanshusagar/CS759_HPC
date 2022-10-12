@@ -2,6 +2,7 @@
 #include "cuda.h"
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+#include "profile.cuh"
 
 #include <iostream>
 #include <string> 
@@ -31,22 +32,37 @@ __global__ void reduce_kernel(float *g_idata, float *g_odata, unsigned int n)
         g_odata[blockIdx.x] = sdata[0];
 
 }
+
 __host__ void reduce(float **input, float **output, unsigned int N,
                      unsigned int threads_per_block)
 {
-    double f_N = N;
-    unsigned int array_size_per_block = 2 * threads_per_block;
-    int grid_size = ceil( f_N / array_size_per_block ); // grid_size X 1.
-    size_t shared_mem_size = ( threads_per_block * sizeof( float ) );
-    cout << "reduce " << N << " " << threads_per_block << " " <<  grid_size << " " << shared_mem_size << endl;
+    float* tmpIn = *input;
+    float* tmpOut = *output;
+    
+    bool shouldSwap = true;
+    for(int iter_N = N ; iter_N > 1; )
+    {
+        double f_N = iter_N;
+        double array_size_per_block = 2 * threads_per_block;
+        int grid_size = ceil( f_N / array_size_per_block ); // grid_size X 1.
+        size_t shared_mem_size = ( threads_per_block * sizeof( float ) );
+        //cout << "reduce " << iter_N << " " << array_size_per_block << " " <<  grid_size << "X" << threads_per_block << endl;
 
-    if(grid_size < 1)
-        return;
-   
-    // Call Kernel
-    reduce_kernel<<<  grid_size, threads_per_block, shared_mem_size >>>( *input, *output , N);
-    cudaDeviceSynchronize();
-    // Now grid size number of threads are left.
-    // Now output is input
-   // reduce(output , input, grid_size / array_size_per_block , threads_per_block);
+        // Call reduce_kernel
+        reduce_kernel<<< grid_size, threads_per_block, shared_mem_size >>>( tmpIn, tmpOut , iter_N);
+        //Mem Set extra folks as 0 so that they don't meddle in sum
+        cudaMemset(tmpOut + grid_size , 0 , N - grid_size);
+        cudaDeviceSynchronize();
+        // Now grid size number of threads are left.
+        iter_N = grid_size;
+        //Swapping
+        std::swap(tmpOut , tmpIn);
+        shouldSwap = !shouldSwap;     
+    }   
+    
+    if(shouldSwap)
+    {
+        *input = tmpOut;
+        *output = tmpIn;
+    }
 }
