@@ -35,7 +35,13 @@ int main(int argc, char *argv[])
 
     float *input, *output;     
     float *d_input, *d_output;
-    size_t size = N * sizeof(float);
+    size_t input_size = N * sizeof(float);
+
+    double f_N = N;
+    double array_size_per_block = 2 * threads_per_block;
+    size_t out_N = ceil( f_N / array_size_per_block );
+    size_t output_size = out_N * sizeof(float); 
+
     
     // Generate Random Values for kernel
     std::random_device entropy_source;
@@ -43,25 +49,26 @@ int main(int argc, char *argv[])
     std::uniform_real_distribution<float> dist(-1.0,1.0);
     
     // Allocate space for device and host array a
-    cudaMalloc((void **)&d_input, size);
+    cudaMalloc((void **)&d_input, input_size);
     cudaCheckError();
-    cudaMalloc((void **)&d_output, size);
+    cudaMalloc((void **)&d_output, output_size);
     cudaCheckError();
     
-    input = (float *)malloc(size);
-    output = (float *)malloc(size);
+    input = (float *)malloc(input_size);
+    output = (float *)malloc(output_size);
     
     // Fill a, b, c array on host
     for(size_t i = 0; i < N ; i++)
     {
         input[i] = i + 1;
-        output[i] = 0;
+        if(i < out_N)
+            output[i] = 0;
     }
 
     //Copy data from host to device
-    cudaMemcpy(d_input, input, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_input, input, input_size, cudaMemcpyHostToDevice);
     cudaCheckError();
-    cudaMemcpy(d_output, output, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_output, output, output_size, cudaMemcpyHostToDevice);
     cudaCheckError();
 
     float time_taken = 0;
@@ -71,13 +78,13 @@ int main(int argc, char *argv[])
         time_taken = g.getTime();
     }
     // Copy result back to host
-    cudaMemcpy(output, d_output, size, cudaMemcpyDeviceToHost);
+    cudaMemcpy(output, d_output, output_size, cudaMemcpyDeviceToHost);
     cudaCheckError();
-    cudaMemcpy(input, d_input, size, cudaMemcpyDeviceToHost);
+    cudaMemcpy(input, d_input, output_size, cudaMemcpyDeviceToHost);
     cudaCheckError();
     //Print last element and time taken.
-    // printX(input, N);
-    // printX(output, N);
+    // printX(input, out_N);
+    // printX(output, out_N);
     
     cout << std::log2(N) << "," << time_taken << endl;
 

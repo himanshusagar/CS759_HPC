@@ -38,6 +38,7 @@ __host__ void reduce(float **input, float **output, unsigned int N,
 {
     float* tmpIn = *input;
     float* tmpOut = *output;
+    int out_N = N;
     
     bool shouldSwap = true;
     for(int iter_N = N ; iter_N > 1; )
@@ -45,13 +46,17 @@ __host__ void reduce(float **input, float **output, unsigned int N,
         double f_N = iter_N;
         double array_size_per_block = 2 * threads_per_block;
         int grid_size = ceil( f_N / array_size_per_block ); // grid_size X 1.
+        if(iter_N == (int)N)
+        {
+            out_N = grid_size;
+        }
         size_t shared_mem_size = ( threads_per_block * sizeof( float ) );
         //cout << "reduce " << iter_N << " " << array_size_per_block << " " <<  grid_size << "X" << threads_per_block << endl;
 
         // Call reduce_kernel
         reduce_kernel<<< grid_size, threads_per_block, shared_mem_size >>>( tmpIn, tmpOut , iter_N);
         //Mem Set extra folks as 0 so that they don't meddle in sum
-        cudaMemset(tmpOut + grid_size , 0 , N - grid_size);
+        cudaMemset(tmpOut + grid_size , 0 , out_N - grid_size);
         cudaDeviceSynchronize();
         // Now grid size number of threads are left.
         iter_N = grid_size;
