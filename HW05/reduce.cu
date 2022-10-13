@@ -65,7 +65,7 @@ __host__ void reduce(float **input, float **output, unsigned int N,
         shouldSwap = !shouldSwap;     
     }   
     
-    if(shouldSwap)
+    if(!shouldSwap)
     {
         *input = tmpOut;
         *output = tmpIn;

@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     // printX(input, out_N);
     // printX(output, out_N);
     
-    cout << std::log2(N) << "," << time_taken << endl;
+    cout << input[0] << endl << time_taken << endl;
 
     // Cleanup
     free(input);
