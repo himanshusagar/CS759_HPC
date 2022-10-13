@@ -42,13 +42,16 @@ __global__ void matmul_kernel(const T *A, const T *B, T *C, unsigned int N, unsi
 }
 
 template <typename T>
-__host__ void matmul(const T *A, const T *B, T *C, unsigned int n,  unsigned int block_dim)
+__host__ void matmul(const T *A, const T *B, T *C, unsigned int N,  unsigned int block_dim)
 {
     // Launch simple kernel on GPU with 2 block and 8 threads.
-    float f_n = n;
+    float f_N = N;
+    float f_block_dim = block_dim;
+    int grid_size = ceil(f_N/f_block_dim);
     dim3 dimBlock( block_dim, block_dim );
-    dim3 dimGrid( f_n/dimBlock.x, f_n/dimBlock.y);
-    matmul_kernel<T><<< dimGrid, dimBlock >>>(A, B, C, n, block_dim);
+    dim3 dimGrid( grid_size , grid_size );
+    int shared_mem_size = N * N * sizeof(T);
+    matmul_kernel<T><<< dimGrid, dimBlock , shared_mem_size >>>(A, B, C, N, block_dim);
 }
 
 

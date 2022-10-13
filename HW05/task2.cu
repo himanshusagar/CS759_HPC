@@ -11,8 +11,9 @@
 using std::cout;
 using std::endl;
 
+
 template <typename T>
-int perf_matmul(int N, int block_dim)
+int perf_matmul(size_t N, size_t block_dim)
 {
 
   T *A, *B, *C;
@@ -20,7 +21,7 @@ int perf_matmul(int N, int block_dim)
   // Generate Random Values for kernel
   std::random_device entropy_source;
   std::mt19937 generator(entropy_source());
-  std::uniform_real_distribution<T> dist(-1.0, 1.0);
+  std::uniform_real_distribution<float> dist(-5, 5);
 
   // Allocate Unified Memory -- accessible from CPU or GPU
   cudaMallocManaged(&A, size);
@@ -31,26 +32,31 @@ int perf_matmul(int N, int block_dim)
   cudaCheckError();
 
   // initialize A,B and C matrices on the host
-  for (int i = 0; i < N * N; i++)
+  for (size_t i = 0; i < N * N; i++)
   {
-    A[i] = 1;
-    B[i] = 2;
+    A[i] = dist(generator);
+    B[i] = dist(generator);
     C[i] = 0;
   }
 
- // if (std::is_same<T, int>::value)
- // {
-    matmul_2(A, B, C, N, block_dim);
-    cudaCheckError();
-  // }
-  // if (std::is_same<T, float>::value)
-  // {
-  //   matmul_2(A, B, C, threads_per_block);
-  // }
-  // if (std::is_same<T, double>::value)
-  // {
-  //   matmul_3(A, B, C, threads_per_block);
-  // }
+  float time_taken = 0;
+  {
+      UnitGPUTime g;
+      if (std::is_same<T, int>::value)
+        matmul_1((const int*)A, (const int*)B, (int*)C, N, block_dim);
+      else if (std::is_same<T, float>::value)
+        matmul_2((const float*)A, (const float*)B, (float*)C, N, block_dim);
+      else if (std::is_same<T, double>::value)
+        matmul_3((const double*)A, (const double*)B, (double*)C, N, block_dim);
+      else
+      {
+        cout << "Wrong matmul called" << endl;
+        return 0;
+      }
+      time_taken = g.getTime();
+  }
+  //cout << C[0] << endl << C[N * N - 1] << endl << time_taken << endl;
+  cout << time_taken << ",";
   
   // Wait for GPU to finish before accessing on host
   cudaDeviceSynchronize();
@@ -71,6 +77,9 @@ int main(int argc, char *argv[])
   }
   size_t N = std::stoi(argv[1]);
   size_t block_dim = std::stoi(argv[2]);
-  perf_matmul<float>(N, block_dim);
-  
+  cout << std::log2(N) << ",";
+  perf_matmul<int>(N, block_dim );
+  perf_matmul<float>(N, block_dim );
+  perf_matmul<double>(N, block_dim );
+  cout << endl;
 }
