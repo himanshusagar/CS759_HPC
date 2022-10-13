@@ -1,4 +1,6 @@
 #include "matmul.cuh"
+#include "profile.cuh"
+
 
 
 template <typename T>
@@ -47,11 +49,13 @@ __host__ void matmul(const T *A, const T *B, T *C, unsigned int N,  unsigned int
     // Launch simple kernel on GPU with 2 block and 8 threads.
     float f_N = N;
     float f_block_dim = block_dim;
-    int grid_size = ceil(f_N/f_block_dim);
+    size_t grid_size = ceil(f_N / f_block_dim);
     dim3 dimBlock( block_dim, block_dim );
     dim3 dimGrid( grid_size , grid_size );
-    int shared_mem_size = N * N * sizeof(T);
+    size_t shared_mem_size = 2 * block_dim * block_dim * sizeof(T); // two mini matrices of size block_dim.
+    //std::cout << block_dim << "X" << grid_size << " SM: " << shared_mem_size << " " << N << std::endl;
     matmul_kernel<T><<< dimGrid, dimBlock , shared_mem_size >>>(A, B, C, N, block_dim);
+    cudaCheckError();
 }
 
 

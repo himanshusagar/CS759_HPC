@@ -81,5 +81,6 @@ int main(int argc, char *argv[])
   perf_matmul<int>(N, block_dim );
   perf_matmul<float>(N, block_dim );
   perf_matmul<double>(N, block_dim );
+
   cout << endl;
 }
