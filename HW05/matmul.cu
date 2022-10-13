@@ -27,7 +27,7 @@ __global__ void matmul_kernel(const T *A, const T *B, T *C, unsigned int N, unsi
     for (int a = aBegin, b = bBegin;a <= aEnd;a += aStep, b += bStep) 
     {
         As[ty * BLOCK_SIZE + tx] = A[a + N * ty + tx];
-        Bs[ty * BOCK_SIZE + tx] = B[b + N * ty + tx];
+        Bs[ty * BLOCK_SIZE + tx] = B[b + N * ty + tx];
 
         __syncthreads();
 
@@ -48,7 +48,7 @@ __host__ void matmul(const T *A, const T *B, T *C, unsigned int n,  unsigned int
     float f_n = n;
     dim3 dimBlock( block_dim, block_dim );
     dim3 dimGrid( f_n/dimBlock.x, f_n/dimBlock.y);
-    matmul_kernel<T><<< dimGrid, dimBlock >>>(A, B, C, d);
+    matmul_kernel<T><<< dimGrid, dimBlock >>>(A, B, C, n, block_dim);
 }
 
 

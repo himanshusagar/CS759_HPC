@@ -12,12 +12,11 @@ using std::cout;
 using std::endl;
 
 template <typename T>
-int perf_matmul(int N, int threads_per_block)
+int perf_matmul(int N, int block_dim)
 {
 
   T *A, *B, *C;
   size_t size = N * N * sizeof(T);
-  cudaError_t cudaStatus;
   // Generate Random Values for kernel
   std::random_device entropy_source;
   std::mt19937 generator(entropy_source());
@@ -25,8 +24,11 @@ int perf_matmul(int N, int threads_per_block)
 
   // Allocate Unified Memory -- accessible from CPU or GPU
   cudaMallocManaged(&A, size);
+  cudaCheckError();
   cudaMallocManaged(&B, size);
+  cudaCheckError();
   cudaMallocManaged(&C, size);
+  cudaCheckError();
 
   // initialize A,B and C matrices on the host
   for (int i = 0; i < N * N; i++)
@@ -36,9 +38,23 @@ int perf_matmul(int N, int threads_per_block)
     C[i] = 0;
   }
 
-  matmul<T>(A, B, C, threads_per_block);
+ // if (std::is_same<T, int>::value)
+ // {
+    matmul_2(A, B, C, N, block_dim);
+    cudaCheckError();
+  // }
+  // if (std::is_same<T, float>::value)
+  // {
+  //   matmul_2(A, B, C, threads_per_block);
+  // }
+  // if (std::is_same<T, double>::value)
+  // {
+  //   matmul_3(A, B, C, threads_per_block);
+  // }
+  
   // Wait for GPU to finish before accessing on host
   cudaDeviceSynchronize();
+  cudaCheckError();
 
   // Free memory
   cudaFree(A);
@@ -54,7 +70,7 @@ int main(int argc, char *argv[])
     return 0;
   }
   size_t N = std::stoi(argv[1]);
-  size_t threads_per_block = std::stoi(argv[2]);
-  perf_matmul<float>(N, threads_per_block);
+  size_t block_dim = std::stoi(argv[2]);
+  perf_matmul<float>(N, block_dim);
   
 }
