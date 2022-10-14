@@ -1,8 +1,6 @@
 #include "matmul.cuh"
 #include "profile.cuh"
 
-
-
 template <typename T>
 __global__ void matmul_kernel(const T *A, const T *B, T *C, unsigned int N, unsigned int BLOCK_SIZE)
 {
@@ -12,36 +10,40 @@ __global__ void matmul_kernel(const T *A, const T *B, T *C, unsigned int N, unsi
     T* As = sData;
     T* Bs = sData + BLOCK_SIZE * BLOCK_SIZE;
 
-    int bx = blockIdx.x;
-    int by = blockIdx.y;
-    int tx = threadIdx.x;
+    int tx = threadIdx.x; 
     int ty = threadIdx.y;
 
-    int aBegin= N * BLOCK_SIZE * by;
-    int aEnd= aBegin + N - 1; 
-    int aStep= BLOCK_SIZE;
+    int row = blockIdx.y * blockDim.y + ty;
+    int col = blockIdx.x * blockDim.x + tx;
+    T cSol = 0;
+    int limit = (N - 1)/BLOCK_SIZE + 1;
 
-    int bBegin= BLOCK_SIZE * bx;
-    int bStep= BLOCK_SIZE * N;
-
-    T Csub = 0;
-
-    for (int a = aBegin, b = bBegin;a <= aEnd;a += aStep, b += bStep) 
+    for (int k = 0; k < limit; ++k) 
     {
-        As[ty * BLOCK_SIZE + tx] = A[a + N * ty + tx];
-        Bs[ty * BLOCK_SIZE + tx] = B[b + N * ty + tx];
+        if(row < N && ( (k * BLOCK_SIZE + tx) < N)  )
+            As[ty * BLOCK_SIZE + tx] = A[ row * N + k * BLOCK_SIZE + tx];
+        else 
+            As[ty * BLOCK_SIZE + tx] = 0;
 
+        if(col < N && ( (k * BLOCK_SIZE + ty) < N ) )
+            Bs[ty * BLOCK_SIZE + tx] = B[( k * BLOCK_SIZE + ty ) * N + col]; 
+        else
+            Bs[ty * BLOCK_SIZE + tx] = 0;
+        
         __syncthreads();
-
-        for (int k = 0; k < BLOCK_SIZE; ++k)
-            Csub += As[ty * BLOCK_SIZE + k] * Bs[k * BLOCK_SIZE + tx];
-
+        
+        if(row < N && col < N)
+        for (int i = 0; i < BLOCK_SIZE; ++i)
+        {  
+            cSol += As[ty * BLOCK_SIZE + i] * Bs[i * BLOCK_SIZE + tx];
+        }
         __syncthreads();
     }
 
-    int c = N * BLOCK_SIZE * by + BLOCK_SIZE * bx;
-    C[c + N * ty + tx] = Csub;
+    if(row < N && col < N)
+        C[row * N + col] = cSol;
 }
+
 
 template <typename T>
 __host__ void matmul(const T *A, const T *B, T *C, unsigned int N,  unsigned int block_dim)

@@ -65,6 +65,7 @@ int perf_matmul(size_t N, size_t block_dim)
   // Free memory
   cudaFree(A);
   cudaFree(B);
+  cudaFree(C);  
   return 0;
 }
 
