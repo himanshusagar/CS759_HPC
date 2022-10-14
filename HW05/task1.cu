@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     // Fill a, b, c array on host
     for(size_t i = 0; i < N ; i++)
     {
-        input[i] = i + 1;
+        input[i] = dist(generator);
         if(i < out_N)
             output[i] = 0;
     }
