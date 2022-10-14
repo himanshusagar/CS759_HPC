@@ -82,10 +82,6 @@ int main(int argc, char *argv[])
     cudaCheckError();
     cudaMemcpy(input, d_input, output_size, cudaMemcpyDeviceToHost);
     cudaCheckError();
-    //Print last element and time taken.
-    // printX(input, out_N);
-    // printX(output, out_N);
-    
     cout << input[0] << endl << time_taken << endl;
 
     // Cleanup

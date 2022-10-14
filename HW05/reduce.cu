@@ -15,19 +15,29 @@ __global__ void reduce_kernel(float *g_idata, float *g_odata, unsigned int n)
 {
     extern __shared__ int sdata[];
     unsigned int tid = threadIdx.x;
-    unsigned int i   = blockIdx.x * ( blockDim.x * 2) + threadIdx.x;
-    sdata[ tid ] = g_idata[ i ] + g_idata[ i + blockDim.x];
+    unsigned int i = blockIdx.x * ( blockDim.x * 2) + threadIdx.x;
+    if(i >= n)
+    {
+        sdata[ tid ] = 0;
+        return;
+    }
+    float next = (i + blockDim.x) < n ? g_idata[i + blockDim.x] : 0;
+    // Load ith index and second index and add it then and there.
+    sdata[ tid ] = g_idata[ i ] + next;
+
     g_odata[blockIdx.x] = 0;
     __syncthreads();
     for(unsigned int s = blockDim.x/2 ; s > 0 ; s >>= 1) 
     {
         if(tid < s) 
         {
+            // Iterative reduction
             sdata[tid] += sdata[tid + s];
         }
         __syncthreads();
     }
 
+    // Set 0th index of sdata as output
     if(tid == 0) 
         g_odata[blockIdx.x] = sdata[0];
 
@@ -40,6 +50,7 @@ __host__ void reduce(float **input, float **output, unsigned int N,
     float* tmpOut = *output;
     int out_N = N;
     
+    // We have 2X array size to be processed by X threads.
     bool shouldSwap = true;
     for(int iter_N = N ; iter_N > 1; )
     {
@@ -48,6 +59,7 @@ __host__ void reduce(float **input, float **output, unsigned int N,
         int grid_size = ceil( f_N / array_size_per_block ); // grid_size X 1.
         if(iter_N == (int)N)
         {
+            // We're limited by this output size
             out_N = grid_size;
         }
         size_t shared_mem_size = ( threads_per_block * sizeof( float ) );
@@ -65,9 +77,7 @@ __host__ void reduce(float **input, float **output, unsigned int N,
         shouldSwap = !shouldSwap;     
     }   
     
-    if(!shouldSwap)
-    {
-        *input = tmpOut;
-        *output = tmpIn;
-    }
+    // To be complete movement of data. Now input will contain final answer.
+    *input = tmpIn;
+    *output = tmpOut;
 }

@@ -81,6 +81,7 @@ int main(int argc, char *argv[])
   std::mt19937 generator(entropy_source());
   std::uniform_real_distribution<float> dist(-5, 5);
 
+  // Fill random arrays to be used with A and B for Int, float and double.
   A_gen = (float*)malloc( N * N * sizeof(float) );
   B_gen = (float*)malloc( N * N * sizeof(float) );
   for (size_t i = 0; i < N * N; i++)
@@ -89,10 +90,12 @@ int main(int argc, char *argv[])
     B_gen[i] = dist(generator);
   }
 
+  // Perform matmul for int float and double
   perf_matmul<int>(N, block_dim );
   perf_matmul<float>(N, block_dim );
   perf_matmul<double>(N, block_dim );
 
+  // free global arrays.
   free(A_gen);
   free(B_gen);
 }

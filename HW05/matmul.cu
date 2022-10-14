@@ -13,6 +13,7 @@ __global__ void matmul_kernel(const T *A, const T *B, T *C, unsigned int N, unsi
     int tx = threadIdx.x; 
     int ty = threadIdx.y;
 
+    // Global row and col index for bounds checking.
     int row = blockIdx.y * blockDim.y + ty;
     int col = blockIdx.x * blockDim.x + tx;
     T cSol = 0;
@@ -20,11 +21,13 @@ __global__ void matmul_kernel(const T *A, const T *B, T *C, unsigned int N, unsi
 
     for (int k = 0; k < limit; ++k) 
     {
+        // See out of tile for As
         if(row < N && ( (k * BLOCK_SIZE + tx) < N)  )
             As[ty * BLOCK_SIZE + tx] = A[ row * N + k * BLOCK_SIZE + tx];
         else 
             As[ty * BLOCK_SIZE + tx] = 0;
 
+        // See out of tile for As
         if(col < N && ( (k * BLOCK_SIZE + ty) < N ) )
             Bs[ty * BLOCK_SIZE + tx] = B[( k * BLOCK_SIZE + ty ) * N + col]; 
         else
@@ -32,6 +35,8 @@ __global__ void matmul_kernel(const T *A, const T *B, T *C, unsigned int N, unsi
         
         __syncthreads();
         
+        // We still need to check here because otherwise As and Bs would not be filled correctly.
+        // But we only need to compute cSol for indices in range.
         if(row < N && col < N)
         for (int i = 0; i < BLOCK_SIZE; ++i)
         {  
@@ -40,6 +45,7 @@ __global__ void matmul_kernel(const T *A, const T *B, T *C, unsigned int N, unsi
         __syncthreads();
     }
 
+    // Now fill back results for cSol's computed.
     if(row < N && col < N)
         C[row * N + col] = cSol;
 }
@@ -63,14 +69,17 @@ __host__ void matmul(const T *A, const T *B, T *C, unsigned int N,  unsigned int
 
 __host__ void matmul_1(const int *A, const int *B, int *C, unsigned int n, unsigned int block_dim)
 {
+    //Int version.
     matmul<int>(A , B , C , n, block_dim);
 }
 __host__ void matmul_2(const float *A, const float *B, float *C, unsigned int n, unsigned int block_dim)
 {
+    //Float version.
     matmul<float>(A , B , C , n, block_dim);
 }
 __host__ void matmul_3(const double *A, const double *B, double *C, unsigned int n, unsigned int block_dim)
 {
+    //Double version.
     matmul<double>(A , B , C , n, block_dim);
 } 
 
