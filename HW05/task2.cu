@@ -11,18 +11,14 @@
 using std::cout;
 using std::endl;
 
+float *A_gen;
+float *B_gen;
 
 template <typename T>
 int perf_matmul(size_t N, size_t block_dim)
 {
-
   T *A, *B, *C;
   size_t size = N * N * sizeof(T);
-  // Generate Random Values for kernel
-  std::random_device entropy_source;
-  std::mt19937 generator(entropy_source());
-  std::uniform_real_distribution<float> dist(-5, 5);
-
   // Allocate Unified Memory -- accessible from CPU or GPU
   cudaMallocManaged(&A, size);
   cudaCheckError();
@@ -31,16 +27,18 @@ int perf_matmul(size_t N, size_t block_dim)
   cudaMallocManaged(&C, size);
   cudaCheckError();
 
-  // initialize A,B and C matrices on the host
+  // initialize A,B and C matrices on the host and gpu
   for (size_t i = 0; i < N * N; i++)
   {
-    A[i] = dist(generator);
-    B[i] = dist(generator);
+    A[i] = (T)A_gen[i];
+    B[i] = (T)B_gen[i];
     C[i] = 0;
   }
 
   float time_taken = 0;
   {
+      //We'll figure out T data type and call appropriate function : 
+      // Int : matmul_1 , Float : matmul_2 and Double : matmul_3
       UnitGPUTime g;
       if (std::is_same<T, int>::value)
         matmul_1((const int*)A, (const int*)B, (int*)C, N, block_dim);
@@ -55,9 +53,8 @@ int perf_matmul(size_t N, size_t block_dim)
       }
       time_taken = g.getTime();
   }
-  //cout << C[0] << endl << C[N * N - 1] << endl << time_taken << endl;
-  cout << time_taken << ",";
-  
+  cout << C[0] << endl << C[N * N - 1] << endl << time_taken << endl;
+
   // Wait for GPU to finish before accessing on host
   cudaDeviceSynchronize();
   cudaCheckError();
@@ -78,10 +75,24 @@ int main(int argc, char *argv[])
   }
   size_t N = std::stoi(argv[1]);
   size_t block_dim = std::stoi(argv[2]);
-  cout << std::log2(N) << ",";
+
+  // Generate Random Values for kernel
+  std::random_device entropy_source;
+  std::mt19937 generator(entropy_source());
+  std::uniform_real_distribution<float> dist(-5, 5);
+
+  A_gen = (float*)malloc( N * N * sizeof(float) );
+  B_gen = (float*)malloc( N * N * sizeof(float) );
+  for (size_t i = 0; i < N * N; i++)
+  {
+    A_gen[i] = dist(generator);
+    B_gen[i] = dist(generator);
+  }
+
   perf_matmul<int>(N, block_dim );
   perf_matmul<float>(N, block_dim );
   perf_matmul<double>(N, block_dim );
 
-  cout << endl;
+  free(A_gen);
+  free(B_gen);
 }
