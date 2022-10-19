@@ -16,6 +16,6 @@ end=$((2**20))
 
 for (( i=$begin ; i<=$end ; i=i*2 )); 
 do
-    ./task1 $i 1024
+    ./task2 $i 1024
 done
 
