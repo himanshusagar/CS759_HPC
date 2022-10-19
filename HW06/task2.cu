@@ -11,16 +11,6 @@
 using std::cout;
 using std::endl;
 
-void printX(float *val, int N)
-{
-    std::cout << "Array : " << std::endl;
-    for(int i = 0; i < N; i++)
-    {
-        std::cout << val[i] << " ";
-    }
-    std::cout << std::endl;
-}
-
 
 int main(int argc, char *argv[])
 {
@@ -59,10 +49,8 @@ int main(int argc, char *argv[])
     time_val = g.getTime();
   }
 
-  //std::cout << tot << " " <<  count << endl;
-  //std::cout << std::log2(N) << "," <<time_val << endl;
+  std::cout << std::log2(N) << "," <<time_val << endl;
 
-  printX(output , N);
   // free unified arrays.
   cudaFree(input);
   cudaFree(output);

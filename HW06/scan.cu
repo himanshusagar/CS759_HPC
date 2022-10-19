@@ -5,7 +5,7 @@
 using std::cout;
 using std::endl;
 
-void printXXX(float *val, int N)
+void printX(float *val, int N)
 {
     std::cout << "Array : " << std::endl;
     for(int i = 0; i < N; i++)
@@ -18,7 +18,6 @@ void printXXX(float *val, int N)
 
 __global__ void merge_results_kernel(float* g_odata, const float *g_addSum, int n, int grid_size, int threads_per_block)
 {
-    
     int tid = threadIdx.x;
     int row = threads_per_block;
     for(int i = 0 ; i < row ; i++)
@@ -70,7 +69,7 @@ __host__ int scan_iter(const float* input, float* output, unsigned int N, unsign
     float f_block_dim = block_dim;
     size_t grid_size = ceil(f_N / f_block_dim);
     size_t shared_mem_size = 2 * block_dim * sizeof(float); // two arrays of size block_dim.
-    std::cout << block_dim << "X" << grid_size << " SM: " << shared_mem_size << " " << N << std::endl;
+    //std::cout << block_dim << "X" << grid_size << " SM: " << shared_mem_size << " " << N << std::endl;
     scan_iter_kernel<<< grid_size, block_dim , shared_mem_size >>>(input, output, N);
     cudaDeviceSynchronize();
     return grid_size;
@@ -86,7 +85,7 @@ __host__ void scan(const float* input, float* output, unsigned int n, unsigned i
         new_N = scan_iter(input , output , N , threads_per_block);
         if(new_N == 1)
             return;
-        printXXX(output , N);
+        // printX(output , N);
         size_t new_size = new_N * sizeof(float);
         cudaMallocManaged(&block_ip, new_size);
         cudaMallocManaged(&block_op, new_size);
@@ -100,21 +99,21 @@ __host__ void scan(const float* input, float* output, unsigned int n, unsigned i
         block_ip[0] = 0;
     }
 ///////////////////////////////////////////////////////////////////////
-    cout << "block_ip :: ";
-    for(int i = 0 ; i < new_N ; i++)
-    {
-        cout << block_ip[i] << " ";
-    }
-    cout << endl;
+    // cout << "block_ip :: ";
+    // for(int i = 0 ; i < new_N ; i++)
+    // {
+    //     cout << block_ip[i] << " ";
+    // }
+    // cout << endl;
     scan_iter(block_ip , block_op , new_N , threads_per_block);
     cudaCheckError();
 
-    cout << "block_op :: ";
-    for(int i = 0 ; i < new_N ; i++)
-    {
-        cout << block_op[i] << " ";
-    }
-    cout << endl;
+    // cout << "block_op :: ";
+    // for(int i = 0 ; i < new_N ; i++)
+    // {
+    //     cout << block_op[i] << " ";
+    // }
+    // cout << endl;
 ////////////////////////////////////////////////////////////////////////
     merge_results_kernel<<< 1 , threads_per_block >>>(output, block_op, N, new_N, threads_per_block);
     cudaDeviceSynchronize();
