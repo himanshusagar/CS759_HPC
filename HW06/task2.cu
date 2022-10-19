@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
   // Generate Random Values for kernel
   std::random_device entropy_source;
   std::mt19937 generator(entropy_source());
-  std::uniform_real_distribution<float> dist(-5, 5);
+  std::uniform_real_distribution<float> dist(-1, 1);
 
   float *input, *output;
   size_t size = N * sizeof(float);
