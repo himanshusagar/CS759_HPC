@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
   double tot = std::accumulate(values.begin() , values.end() , 0.f);
   double count = N_tests;
   //std::cout << tot << " " <<  count << endl;
-  std::cout << std::log2(N) << "," << tot / count << endl;
+  std::cout << tot / count << endl;
 
   // printX(C , N);
   // free unified arrays.

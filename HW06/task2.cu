@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     time_val = g.getTime();
   }
 
-  std::cout << std::log2(N) << "," <<time_val << endl;
+  std::cout << output[N-1] << endl << time_val << endl;
 
   // free unified arrays.
   cudaFree(input);
