@@ -38,10 +38,11 @@ int main(int argc, char *argv[])
   // initialize A,B and C matrices on the host and gpu
   for (size_t i = 0; i < N; i++)
   {
-    input[i] = 1;
+    input[i] = dist(generator);
     output[i] = 0;
   }
 
+  // call kernel and compute time.
   float time_val;
   {
     UnitGPUTime g;
@@ -49,6 +50,7 @@ int main(int argc, char *argv[])
     time_val = g.getTime();
   }
 
+  // print output
   std::cout << output[N-1] << endl << time_val << endl;
 
   // free unified arrays.

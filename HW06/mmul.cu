@@ -3,6 +3,7 @@
 #include "mmul.h"
 #include "profile.cuh"
 
+// CuBlas Error Printing.
 static const char * __cublasGetErrorEnum(cublasStatus_t error)
 {
     switch (error)
@@ -46,12 +47,15 @@ void mmul(cublasHandle_t handle, const float* A, const float* B, float* C, int N
     const float alpha = 1.0f;
     const float beta  = 1.0f;
 
+    // cublasSgemm does matrix mul for column major matrices, We're assuming A, B and C are column major.
     cublasStatus_t status = cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, 
         &alpha, A, N, B, N, &beta, C, N);
+    // Check Status for cublas errors
     if(status != CUBLAS_STATUS_SUCCESS)
     {
         printf("cublasSgemm error %s" , __cublasGetErrorEnum(status));
     }
+    //Sync and go back
     cudaDeviceSynchronize();
     cudaCheckError();
 }
