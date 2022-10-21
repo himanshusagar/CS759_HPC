@@ -5,16 +5,6 @@
 using std::cout;
 using std::endl;
 
-void printX(float *val, int N)
-{
-    std::cout << "Array : " << std::endl;
-    for(int i = 0; i < N; i++)
-    {
-        std::cout << val[i] << " ";
-    }
-    std::cout << std::endl;
-}
-
 
 __global__ void merge_results_kernel(float* g_odata, const float *g_addSum, int N, int grid_size, int threads_per_block)
 {
@@ -22,6 +12,7 @@ __global__ void merge_results_kernel(float* g_odata, const float *g_addSum, int 
     if(tid >= N)
         return;
     int row = threads_per_block;
+    // Merging results is just summing over everything.
     for(int i = 0 ; i < row ; i++)
     {
         int index = tid*row + i;
@@ -31,8 +22,9 @@ __global__ void merge_results_kernel(float* g_odata, const float *g_addSum, int 
         }
     }
 }
+// Copied from lecture slides but changed for running all blocks.
 __global__ void scan_iter_kernel(const float* g_idata , float* g_odata, int N)
-{
+{   
     extern volatile __shared__ float sharedMem[];
     int g_index = blockDim.x * blockIdx.x + threadIdx.x;
     int tid = threadIdx.x;
@@ -50,7 +42,7 @@ __global__ void scan_iter_kernel(const float* g_idata , float* g_odata, int N)
         pout = 1 - pout;
         pin = 1 - pin;
 
-        if(tid >= offset)
+        if(tid >= offset) // See if we need computation here.
         {
             sharedMem[ pout*bDim + tid ] = sharedMem[pin*bDim + tid] + sharedMem[ pin*bDim + tid - offset]; 
         }
@@ -62,7 +54,7 @@ __global__ void scan_iter_kernel(const float* g_idata , float* g_odata, int N)
         __syncthreads();
     }
 
-    if(g_index < N)
+    if(g_index < N) // If in range then set output.
     {
         g_odata[g_index] = sharedMem[pout*bDim + tid];
     }
@@ -71,11 +63,12 @@ __global__ void scan_iter_kernel(const float* g_idata , float* g_odata, int N)
 
 __host__ int scan_iter(const float* input, float* output, unsigned int N, unsigned int block_dim)
 {
+    // Compute paramters to launch kernel
     float f_N = N;
     float f_block_dim = block_dim;
     size_t grid_size = ceil(f_N / f_block_dim);
-    size_t shared_mem_size = 2 * block_dim * sizeof(float); // two arrays of size block_dim.
-    //std::cout << block_dim << "X" << grid_size << " SM: " << shared_mem_size << " " << N << std::endl;
+    size_t shared_mem_size = 2 * block_dim * sizeof(float); 
+    // Launch scan kernel
     scan_iter_kernel<<< grid_size, block_dim , shared_mem_size >>>(input, output, N);
     cudaDeviceSynchronize();
     cudaCheckError();  
@@ -89,16 +82,17 @@ __host__ void scan(const float* input, float* output, unsigned int n, unsigned i
     int new_N;
     float *block_ip , *block_op;
     {
+        // If only block suffices, then we're done.
         new_N = scan_iter(input , output , N , threads_per_block);
         if(new_N <= 1)
             return;
-        //printX(output , N);
         size_t new_size = new_N * sizeof( float );
         cudaMallocManaged(&block_ip, new_size);
         cudaCheckError();  
         cudaMallocManaged(&block_op, new_size);
         cudaCheckError();  
         block_ip[0] = 0;
+        // Generate middle input array for computation.
         for(int i = 1 , output_index = threads_per_block ; i < new_N ; i++)
         {
             output_index = std::min(N , output_index);
@@ -106,11 +100,12 @@ __host__ void scan(const float* input, float* output, unsigned int n, unsigned i
             output_index += threads_per_block;
         }
     }
-///////////////////////////////////////////////////////////////////////
+    // Run one more iteration of scan to accumulate for all blocks
     scan_iter(block_ip , block_op , new_N , threads_per_block);
     cudaCheckError();
-    ////////////////////////////////////////////////////////////////////
+    // Merge results by summing over entire range for final output.
     merge_results_kernel<<< 1 , threads_per_block >>>(output, block_op, N, new_N, threads_per_block);
+    // Sync and check for errors.
     cudaDeviceSynchronize();
     cudaCheckError();
 }

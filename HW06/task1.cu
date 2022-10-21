@@ -58,21 +58,19 @@ int main(int argc, char *argv[])
   cublasHandle_t handle;
   cublasCreate(&handle);
 
-  // initialize A,B and C matrices on the host and gpu
+  // initialize A,B and C matrices 
   for (size_t i = 0; i < N * N; i++)
   {
-    A[i] = i;
-    C_temp[i] = i;
-  }
-
-  for (size_t i = 0; i < N; i++)
-  {
-    B[i + i * N] = 1;
+    A[i] = dist(generator);
+    B[i] = dist(generator);
+    // Storing in a temp variable. Will restore from it again.
+    C_temp[i] = dist(generator);
   }
 
   std::vector<float> values;
   for(size_t _ = 0 ; _ < N_tests ; _++)
   {
+    // Copy from Temp so that we perform same computation - C for each iteration.
     cudaMemcpy(C , C_temp , size , cudaMemcpyDeviceToDevice);
     {
       UnitGPUTime g;
@@ -83,11 +81,10 @@ int main(int argc, char *argv[])
 
   double tot = std::accumulate(values.begin() , values.end() , 0.f);
   double count = N_tests;
-  //std::cout << tot << " " <<  count << endl;
+  // Compute Average
   std::cout << tot / count << endl;
 
-  // printX(C , N);
-  // free unified arrays.
+  // Free arrays and handles
   cublasDestroy(handle);
   cudaFree(A);
   cudaFree(B);

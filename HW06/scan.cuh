@@ -11,6 +11,5 @@
 // Assumptions:
 // - n <= threads_per_block * threads_per_block
 __host__ void scan(const float* input, float* output, unsigned int n, unsigned int threads_per_block);
-__host__ int scan_iter(const float* input, float* output, unsigned int N, unsigned int block_dim);
 
 #endif

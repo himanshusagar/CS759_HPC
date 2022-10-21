@@ -11,6 +11,7 @@ module load nvidia/cuda
 rm task2
 nvcc task2.cu scan.cu -Xcompiler -O3 -Xcompiler -Wall -Xptxas -O3 -std c++17 -o task2
 
+
 begin=$((2**10))
 end=$((2**20))
 
