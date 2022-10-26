@@ -89,3 +89,4 @@ dkms.conf
 *.vscode
 *.err
 task[0-9]
+task1_thrust
