@@ -13,8 +13,6 @@ rm task1_cub
 
 nvcc task1_cub.cu -Xcompiler -O3 -Xcompiler -Wall -Xptxas -O3 -std c++17 -o task1_cub
 
-#./task1_cub 1024
-
 begin=$((2**10))
 end=$((2**30))
 

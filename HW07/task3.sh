@@ -11,5 +11,5 @@ rm task3
 
 g++ task3.cpp -fopenmp -Wall -O3 -std=c++17 -o task3 
 
-./task3 10
+./task3
 

@@ -6,7 +6,6 @@
 
 int main(int argc, char *argv[])
 {
-
     omp_set_num_threads(4);
     std::printf("Number of threads: %d\n", omp_get_max_threads());
 
@@ -23,6 +22,5 @@ int main(int argc, char *argv[])
         fflush(stdout);
     }
 }
-
     return 0;
 }
