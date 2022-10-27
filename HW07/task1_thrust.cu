@@ -9,6 +9,8 @@
 #include <thrust/device_vector.h>
 #include <thrust/functional.h>
 #include <thrust/sort.h>
+#include <thrust/random/linear_congruential_engine.h>
+#include <thrust/random/uniform_real_distribution.h>
 
 
 int main(int argc, char *argv[])
@@ -20,9 +22,8 @@ int main(int argc, char *argv[])
   }
   size_t N = std::stoi(argv[1]);
   // Generate Random Values for kernel 
-  std::random_device entropy_source;
-  std::mt19937 generator(entropy_source());
-  std::uniform_real_distribution<float> dist(-1, 1);
+  thrust::minstd_rand generator;
+  thrust::uniform_real_distribution<float> dist(-1,1);
   thrust::host_vector<float> h_vec(N);
 
   //Fill host vector with random values

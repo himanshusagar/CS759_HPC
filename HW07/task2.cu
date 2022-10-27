@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <random>
 #include <cmath>
 
 #include "profile.cuh"
@@ -10,6 +9,8 @@
 #include <thrust/device_vector.h>
 #include <thrust/functional.h>
 #include <thrust/sort.h>
+#include <thrust/random/linear_congruential_engine.h>
+#include <thrust/random/uniform_int_distribution.h>
 
 
 void printX( thrust::device_vector<int>& val)
@@ -28,9 +29,8 @@ int main(int argc, char *argv[])
   }
   size_t N = std::stoi(argv[1]);
   // Generate Random Values for kernel 
-  std::random_device entropy_source;
-  std::mt19937 generator(entropy_source());
-  std::uniform_int_distribution<> dist(0, 500);
+  thrust::minstd_rand generator;
+  thrust::uniform_int_distribution<int> dist(0,500);
   thrust::host_vector<int> h_vec(N);
 
   //Fill host vector with values
@@ -53,8 +53,8 @@ int main(int argc, char *argv[])
   int last = values.size(); 
   last--;
   //Print out last elements.
-  std::cout << values[last] << std::endl
-            << count[last] << std::endl
-            << time_val << std::endl;
+  std::cout << values[last] << std::endl;
+  std::cout << counts[last] << std::endl;
+  std::cout << time_val << std::endl;
   return 0;
 }
