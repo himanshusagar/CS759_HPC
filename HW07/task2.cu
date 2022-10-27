@@ -15,7 +15,7 @@
 void printX( thrust::device_vector<int>& val)
 {
   std::cout << "Array: " << std::endl;
-  thrust::copy(d_data.begin(), d_data.end(), std::ostream_iterator<int>(std::cout, " "));
+  thrust::copy(val.begin(), val.end(), std::ostream_iterator<int>(std::cout, " "));
   std::cout << std::endl;
 
 }
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 
   for (size_t i = 0; i < N; i++)
   {
-    h_vec[i] = i % 4;
+    h_vec[i] = dist(generator);
   }
   // transfer data to the device
   thrust::device_vector<int> d_vec(N) , values, counts;
@@ -52,9 +52,6 @@ int main(int argc, char *argv[])
     count(d_vec , values , counts);
     time_val = g.getTime();
   }
-
-  printX(values);
-  printX(counts);
   
   //std::cout << sol << std::endl << time_val << std::endl;
   std::cout << std::log2(N) << "," << time_val << std::endl;

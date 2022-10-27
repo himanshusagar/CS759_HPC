@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 
   for (size_t i = 0; i < N; i++)
   {
-    h_vec[i] = i;
+    h_vec[i] = dist(generator);
   }
   // transfer data to the device
   thrust::device_vector<float> d_vec(N);

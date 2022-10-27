@@ -13,5 +13,11 @@ rm task2
 
 nvcc task2.cu count.cu -Xcompiler -O3 -Xcompiler -Wall -Xptxas -O3 -std c++17 -o task2
 
-./task2 10
+begin=$((2**5))
+end=$((2**24))
+
+for (( i=$begin ; i<=$end ; i=i*2 )); 
+do
+    ./task2 $i
+done
 

@@ -8,6 +8,7 @@
 #include <thrust/sort.h>
 #include <thrust/unique.h>
 #include <thrust/execution_policy.h>
+#include <thrust/inner_product.h>
 
 void count(const thrust::device_vector<int>& d_in,
     thrust::device_vector<int>& values,
