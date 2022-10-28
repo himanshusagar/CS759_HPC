@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
         {
             sol *= j;
         }
+        //Print Output and Flush Stdout
         std::printf("%d!=%d\n", i, sol);
         fflush(stdout);
     }
