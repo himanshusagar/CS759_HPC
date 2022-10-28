@@ -8,7 +8,12 @@ int main(int argc, char *argv[])
 {
     //Set thread count
     omp_set_num_threads(4);
+
+#pragma omp parallel
+#pragma omp master
+    {
     std::printf("Number of threads: %d\n", omp_get_max_threads());
+    }
 
 #pragma omp parallel
     {
