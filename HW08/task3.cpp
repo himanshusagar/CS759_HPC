@@ -24,7 +24,8 @@ int main(int argc, char *argv[])
     size_t N = stoi(argv[1]);
     size_t T = stoi(argv[2]);
     size_t threshold = stoi(argv[3]);
-    
+
+    omp_set_num_threads(T);
     int *arr = new int[N];
 
     std::default_random_engine e;

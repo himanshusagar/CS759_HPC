@@ -94,7 +94,7 @@ void unit_sort(int* arr, int begin , int end , int N)
     {
         end = std::min( N-1 , end);
         int size = end - begin + 1;
-        std::sort( arr + begin, arr + size);
+        std::sort( arr + begin, arr + begin + size);
     }
 }
 
@@ -102,7 +102,7 @@ void unit_merge(int* arr, int begin1 , int end1 , int begin2 , int end2 )
 {
     std::vector<int> buffer;
     int init_begin = begin1;
-    while(begin1 < end1 && begin2 < end2)
+    while(begin1 <= end1 && begin2 <= end2)
     {
         if(arr[begin1] < arr[begin2])
         {
@@ -114,11 +114,11 @@ void unit_merge(int* arr, int begin1 , int end1 , int begin2 , int end2 )
         }
 
     }
-    while(begin1 < end1)
+    while(begin1 <= end1)
     {
         buffer.push_back( arr[begin1++] );
     }
-    while(begin2 < end2)
+    while(begin2 <= end2)
     {
         buffer.push_back( arr[begin2++] );
     }
@@ -139,11 +139,14 @@ void merge_results(int* arr, float N , float T)
     {
         int portion_size = std::ceil( N/T );
         #pragma omp parallel for
-        for(int i = 0; i < get_half_ceil(T) ; i++)
+        for(int i = 0; i < (int)T ; i +=2 )
         {
-            int begin = i * portion_size;
-            int end  = begin + portion_size - 1;
-            unit_merge(arr , begin , end , end + 1 , end + portion_size - 1 );
+            int begin1 = i * portion_size;
+            int end1  = begin1 + portion_size - 1;
+            int begin2 = (i + 1) * portion_size;
+            int end2  = begin2 + portion_size - 1;
+            if(begin2 < N)
+                unit_merge(arr , begin1 , end1 , begin2 , end2);
 
         }
         T = get_half_ceil(T); 
