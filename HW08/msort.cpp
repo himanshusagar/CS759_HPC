@@ -7,9 +7,9 @@
 
 using std::vector;
 
-
 void insertionSort(vector<int>& vec, int begin, int end) 
 {
+    //Simple insertion sort implementation for vec size less than threshold
     for(int j = begin + 1; j <= end; j++)
     {
       int key = vec[j];
@@ -26,6 +26,7 @@ void insertionSort(vector<int>& vec, int begin, int end)
 
 void merge_results(vector<int>& vec, int begin1 , int end1 , int begin2 , int end2 )
 {
+    //Use Empty buffer to put back results in sorted order.
     std::vector<int> buffer;
     int init_begin = begin1;
     while(begin1 <= end1 && begin2 <= end2)
@@ -40,14 +41,17 @@ void merge_results(vector<int>& vec, int begin1 , int end1 , int begin2 , int en
         }
 
     }
+    //Pushback values left from left side
     while(begin1 <= end1)
     {
         buffer.push_back( vec[begin1++] );
     }
+    //Pushback values left from right side
     while(begin2 <= end2)
     {
         buffer.push_back( vec[begin2++] );
     }
+    //Fill vec with results.
     std::copy(buffer.begin(), buffer.end(),
               vec.begin() + init_begin);
     
@@ -55,14 +59,16 @@ void merge_results(vector<int>& vec, int begin1 , int end1 , int begin2 , int en
 
 void mergeSort(vector<int>& vec, int begin, int end, int threshold)
 {
+    // Check if out of range.
     if (begin >= end)
         return;
+    // Check if insertion sort needs to be used.
     if( (end - begin) <= threshold) 
     {
         insertionSort(vec , begin , end);
         return;
     }   
-
+    //Find mid and perform sort.
     int mid = (begin + end)/2; 
     #pragma omp taskgroup
     {
@@ -80,6 +86,7 @@ void msort(int* arr, const std::size_t n, const std::size_t threshold)
     #pragma omp parallel
     #pragma omp single
     {
+        //Make vector out of array, perform sort and copy back results.
         vector <int> vec(arr , arr + n);
         mergeSort(vec, 0 , n - 1 , threshold);
         std::copy(vec.begin(), vec.end(), arr);

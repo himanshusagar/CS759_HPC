@@ -19,25 +19,21 @@ int main(int argc, char *argv[])
     size_t N = atoi(argv[1]);
     size_t M = 3;
     size_t T = atoi(argv[2]);
+    //Set thread count
     omp_set_num_threads(T);
 
+    //Allocate memory
     float *image = new float[N * N];
     float *output = new float[N * N];
     float *mask = new float[M * M];
 
+    //Generate random values
     std::default_random_engine e;
     e.seed(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_real_distribution<> image_dis(-10, 10);
     std::uniform_real_distribution<> mask_dis(-1, 1);
 
-    // float img[] = {1,3,4,8,
-    //                 6,5,2,4,
-    //                 3,4,6,8,
-    //                 1,4,5,2};
-    // float msk[] = {
-    //                 0, 0, 1,
-    //                 0, 1, 0,
-    //                 1, 0, 0};
+    //Fill random values and init output
     for (size_t i = 0; i < N * N; i++)
     {
         image[i] = image_dis(e);
@@ -52,6 +48,7 @@ int main(int argc, char *argv[])
         convolve(image, output, N, mask, M);
         time_taken = u.getTime();
     }
+    //Print out results as per HW.
     cout << output[0] << endl << output[(N * N) - 1] << endl << time_taken <<  endl;
 
     delete[] output;

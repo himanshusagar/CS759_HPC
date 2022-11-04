@@ -16,17 +16,20 @@ int main(int argc, char *argv[])
     }
     size_t N = std::stoi(argv[1]);
     size_t T = std::stoi(argv[2]);
+    //Set thread count
     omp_set_num_threads(T);
 
+    //Int matrices for multiplication
     float *A = new float[N * N];
     float *B = new float[N * N];
     float *C = new float[N * N];
 
+    // Generate random values
     std::default_random_engine e;
     e.seed(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_real_distribution<> dis(-10, 10);
 
-    // std::cout << T << ", ";
+    // Fill values in A and B and init C.
     for (size_t i = 0; i < N * N; i++)
     {
         A[i] = dis(e);
@@ -40,6 +43,7 @@ int main(int argc, char *argv[])
         mmul(A, B, C, N);
         time_taken = u.getTime();
     }
+    //Print out results as per HW.
     std::cout << C[0] << std::endl <<  C[N * N - 1] << std::endl <<  time_taken << std::endl;
 
     delete[] A;
