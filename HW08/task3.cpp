@@ -4,16 +4,6 @@
 
 using namespace std;
 
-void printX(int *arr , int N)
-{
-    cout << "Print : ";
-    for (size_t i = 0; i < N; i++)
-    {
-        cout << arr[i] << ", ";
-    }
-    cout << endl;
-    
-}
 int main(int argc, char *argv[])
 {
     if (argc != 4)
@@ -30,9 +20,10 @@ int main(int argc, char *argv[])
 
     std::default_random_engine e;
     e.seed(std::chrono::system_clock::now().time_since_epoch().count());
-    std::uniform_int_distribution<> dis(1, 1);
+    std::uniform_int_distribution<> dis(-1000, 1000);
+
     for (size_t i = 0; i < N; i++)
-        arr[i] = N - i;
+        arr[i] = dis(e);
     
     float time_taken;
     {
@@ -41,11 +32,9 @@ int main(int argc, char *argv[])
         time_taken = u.getTime();
 
     }
-    printX(arr , N);
     
-
-    cout << N << ", " << T << ", " << time_taken << endl;
-    //cout << arr[0] << endl << arr[N - 1] << endl << time_taken << endl;
+    //cout << N << ", " << T << ", " << std::log2(threshold) << ", " << time_taken << endl;
+    cout << arr[0] << endl << arr[N - 1] << endl << time_taken << endl;
 
     delete[] arr;
     return 0;

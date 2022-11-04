@@ -10,7 +10,7 @@ int getIndex(int size , int i , int j)
 }
 void convolve(const float *image, float *output, std::size_t n, const float *mask, std::size_t m)
 {
-    #pragma omp parallel for
+    #pragma omp parallel for collapse(2)
     for (size_t x = 0; x < n; x++)
     {
         for (size_t y = 0; y < n; y++)

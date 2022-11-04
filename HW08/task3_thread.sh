@@ -10,6 +10,11 @@
 rm task3
 g++ task3.cpp msort.cpp -Wall -O3 -std=c++17 -o task3 -fopenmp
 
-./task3 12 3 1
+begin=$((1))
+end=$((20))
 
+for (( i=$begin ; i<=$end ; i=i+1 )); 
+do
+    ./task3 1000000 $i 128
+done
 

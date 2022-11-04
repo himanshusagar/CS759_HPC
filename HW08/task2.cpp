@@ -52,9 +52,7 @@ int main(int argc, char *argv[])
         convolve(image, output, N, mask, M);
         time_taken = u.getTime();
     }
-    cout << T << ", " << time_taken << endl;
-
-    //cout << output[0] << endl << output[(N * N) - 1] << endl << time_taken <<  endl;
+    cout << output[0] << endl << output[(N * N) - 1] << endl << time_taken <<  endl;
 
     delete[] output;
     delete[] image;

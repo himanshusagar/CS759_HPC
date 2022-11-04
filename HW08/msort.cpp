@@ -5,175 +5,83 @@
 
 #include "msort.h"
 
+using std::vector;
 
 
-void merge(int *arr, int l,
-		int m, int r)
+void insertionSort(vector<int>& vec, int begin, int end) 
 {
-	int i, j, k;
-	int n1 = m - l + 1;
-	int n2 = r - m;
-
-	// Create temp arrays
-	int L[n1], R[n2];
-
-	// Copy data to temp arrays
-	// L[] and R[]
-	for (i = 0; i < n1; i++)
-		L[i] = arr[l + i];
-	for (j = 0; j < n2; j++)
-		R[j] = arr[m + 1 + j];
-
-	// Merge the temp arrays back
-	// into arr[l..r]
-	// Initial index of first subarray
-	i = 0;
-
-	// Initial index of second subarray
-	j = 0;
-
-	// Initial index of merged subarray
-	k = l;
-	while (i < n1 && j < n2)
-	{
-		if (L[i] <= R[j])
-		{
-			arr[k] = L[i];
-			i++;
-		}
-		else
-		{
-			arr[k] = R[j];
-			j++;
-		}
-		k++;
-	}
-
-	// Copy the remaining elements
-	// of L[], if there are any
-	while (i < n1) {
-		arr[k] = L[i];
-		i++;
-		k++;
-	}
-
-	// Copy the remaining elements of
-	// R[], if there are any
-	while (j < n2)
-	{
-		arr[k] = R[j];
-		j++;
-		k++;
-	}
-}
-
-// l is for left index and r is
-// right index of the sub-array
-// of arr to be sorted
-void mergeSort(int *arr,
-			int l, int r)
-{
-	if (l < r)
-	{
-		// Same as (l+r)/2, but avoids
-		// overflow for large l and h
-		int m = l + (r - l) / 2;
-
-		// Sort first and second halves
-		mergeSort(arr, l, m);
-		mergeSort(arr, m + 1, r);
-
-		merge(arr, l, m, r);
-	}
-}
-
-
-void unit_sort(int* arr, int begin , int end , int N)
-{
-    if( (begin < end) && (end < N) )
+    for(int j = begin + 1; j <= end; j++)
     {
-        end = std::min( N-1 , end);
-        int size = end - begin + 1;
-        std::sort( arr + begin, arr + begin + size);
+      int key = vec[j];
+      int i = j-1;
+
+      while(i >= begin && vec[i] > key)
+      {
+         vec[i+1] = vec[i];
+         i--;
+      }
+      vec[i+1] = key;
     }
 }
 
-void unit_merge(int* arr, int begin1 , int end1 , int begin2 , int end2 )
+void merge_results(vector<int>& vec, int begin1 , int end1 , int begin2 , int end2 )
 {
     std::vector<int> buffer;
     int init_begin = begin1;
     while(begin1 <= end1 && begin2 <= end2)
     {
-        if(arr[begin1] < arr[begin2])
+        if(vec[begin1] < vec[begin2])
         {
-            buffer.push_back( arr[begin1++] );
+            buffer.push_back( vec[begin1++] );
         }
         else
         {
-            buffer.push_back( arr[begin2++] );
+            buffer.push_back( vec[begin2++] );
         }
 
     }
     while(begin1 <= end1)
     {
-        buffer.push_back( arr[begin1++] );
+        buffer.push_back( vec[begin1++] );
     }
     while(begin2 <= end2)
     {
-        buffer.push_back( arr[begin2++] );
+        buffer.push_back( vec[begin2++] );
     }
     std::copy(buffer.begin(), buffer.end(),
-              arr + init_begin);
+              vec.begin() + init_begin);
     
 }
-int get_half_ceil(int a)
-{
-    int f_a = a;
-    return ceil( f_a/2.0f );
-}
-void merge_results(int* arr, float N , float T)
-{
-    //Time to merge
-    int level = std::ceil(  std::log2(T) );  // T elements to be merged;
-    while (level--)
-    {
-        int portion_size = std::ceil( N/T );
-        #pragma omp parallel for
-        for(int i = 0; i < (int)T ; i +=2 )
-        {
-            int begin1 = i * portion_size;
-            int end1  = begin1 + portion_size - 1;
-            int begin2 = (i + 1) * portion_size;
-            int end2  = begin2 + portion_size - 1;
-            if(begin2 < N)
-                unit_merge(arr , begin1 , end1 , begin2 , end2);
 
-        }
-        T = get_half_ceil(T); 
+void mergeSort(vector<int>& vec, int begin, int end, int threshold)
+{
+    if (begin >= end)
+        return;
+    if( (end - begin) <= threshold) 
+    {
+        insertionSort(vec , begin , end);
+        return;
+    }   
+
+    int mid = (begin + end)/2; 
+    #pragma omp taskgroup
+    {
+        #pragma omp task shared(vec) untied
+        mergeSort(vec, begin, mid, threshold);
+        #pragma omp task shared(vec) untied
+        mergeSort(vec, mid + 1, end, threshold);
+        #pragma omp taskyield
     }
-    
+    merge_results(vec,  begin,  mid , mid + 1, end );
 }
+
 void msort(int* arr, const std::size_t n, const std::size_t threshold)
 {
-    if(n < threshold)
+    #pragma omp parallel
+    #pragma omp single
     {
-        unit_sort(arr, 0 , n-1 , n);
-        return;
+        vector <int> vec(arr , arr + n);
+        mergeSort(vec, 0 , n - 1 , threshold);
+        std::copy(vec.begin(), vec.end(), arr);
     }
-
-    float N = n;
-    int T = omp_get_num_threads();
-    // Individual sort done.
-    {
-        int portion_size = std::ceil( N/T );
-        #pragma omp parallel for
-        for (int i = 0; i < T ; i++)
-        {
-            int begin = i * portion_size;
-            int end = begin + portion_size - 1;
-            unit_sort(arr, begin , end , n);
-        }
-    }
-
-    merge_results(arr, N , T);
 }

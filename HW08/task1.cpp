@@ -40,7 +40,6 @@ int main(int argc, char *argv[])
         mmul(A, B, C, N);
         time_taken = u.getTime();
     }
-    // std::cout << time_taken << std::endl;
     std::cout << C[0] << std::endl <<  C[N * N - 1] << std::endl <<  time_taken << std::endl;
 
     delete[] A;
