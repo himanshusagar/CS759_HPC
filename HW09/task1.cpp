@@ -43,13 +43,14 @@ int main(int argc, char *argv[])
     float f_N = N;
     float f_T = T;
     
+    // Fill centers arrays. 
     for (size_t i = 0; i < T; i++)
     {
         centers[i] =  (2 * i * f_N)  +  (f_N) / (2 * f_T);
         dists[i] = 0;
     }
     
-    
+    // Run and compute time taken(ms)
     float time_taken;
     {
         UnitTime u;
@@ -60,6 +61,7 @@ int main(int argc, char *argv[])
     float max_tot = -1;
     float max_index = -1;
 
+    //Reduction to find Max Value and Max Index  
     #pragma omp parallel for reduction( max : max_tot)
     for (size_t i = 0; i < T; i++)
     {

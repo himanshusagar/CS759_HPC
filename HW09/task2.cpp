@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
     float in_points = 0;
     float tot_points = N;
     
+    // Time to monte carlo
     float time_taken;
     {
         UnitTime u;
