@@ -13,7 +13,7 @@ rm task3
 mpicxx task3.cpp -Wall -O3 -o task3
 
 begin=$((2**1))
-end=$((2**26))
+end=$((2**25))
 
 for (( i=$begin ; i<=$end ; i=i*2 )); 
 do
