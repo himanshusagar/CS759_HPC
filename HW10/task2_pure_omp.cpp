@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
     
     //Set thread count
     omp_set_num_threads(T);
+    // Init Array
     float *array = new float[arr_size];
     float global_res = 0;
 
@@ -30,6 +31,7 @@ int main(int argc, char *argv[])
         array[i] = dis(e);
     }
 
+    //Compute time taken by reduce function
     float time_taken;
     {
         UnitTime u;
@@ -37,10 +39,7 @@ int main(int argc, char *argv[])
         time_taken = u.getTime();
     }
 
-    {
-        //std::cout << time_taken <<  std::endl;
-        std::cout << std::log2(arr_size) << ", " << T << ", " <<  time_taken << std::endl;
-    }
-
+    //Print Final Results
+    std::cout << global_res << std::endl <<  time_taken << std::endl;
     return 0;
 }

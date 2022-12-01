@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
         array[i] = (my_rank + 1);
     }
 
+    //Barrier to ensure correct time estimates.
     ret_code = MPI_Barrier (MPI_COMM_WORLD); 
     if (ret_code != MPI_SUCCESS)
     {
@@ -47,6 +48,7 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
+    //Compute time taken by local reduce and global - MPI_reduce.
     float time_taken;
     {
         UnitTime u;
@@ -62,10 +64,11 @@ int main(int argc, char *argv[])
 
     if(my_rank == 0) 
     {
-        //std::cout << time_taken <<  std::endl;
-        std::cout << std::log2(arr_size) << ", " << T << ", " <<  time_taken << std::endl;
+        //Print Final Results in rank 0 machine
+        std::cout << global_res << std::endl <<  time_taken << std::endl;
     }
 
+    //End MPI ecosystem
     ret_code = MPI_Finalize();
     if (ret_code != MPI_SUCCESS)
     {

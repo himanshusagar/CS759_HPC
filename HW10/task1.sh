@@ -11,7 +11,7 @@
 
 rm task1
 
-simd=true
+simd=false
 
 if [ "$simd" = true ]
 then
