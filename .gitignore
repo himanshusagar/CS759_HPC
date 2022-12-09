@@ -93,3 +93,6 @@ task1_thrust
 task2_pure_omp
 tmp/*
 FinalProject759/external/*
+
+mc_cpu
+mc_gpu
