@@ -92,3 +92,4 @@ task[0-9]
 task1_thrust
 task2_pure_omp
 tmp/*
+FinalProject759/external/*
