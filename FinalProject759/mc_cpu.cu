@@ -9,14 +9,10 @@ extern "C" void
 dgesvd_(char *, char *, long *, long *, double *, long *, double *, double *, long *, double *, long *, double *,
         long *, long *);
 
-static double isEarnMoney(double value, const double strike_price) {
-    return value > strike_price;
-}
-
 static double cpu_version(const Params &param) {
     // HOST: generate random values
     size_t simulation_size = param.n_timestamp * param.n_paths;
-    double *host_random_input = gen_host_random_samples(simulation_size);
+    double *host_random_input = gen_host_random_samples(simulation_size , false);
 
     // HOST: calculated paths.
     double *host_paths = gen_host_paths(param, host_random_input);

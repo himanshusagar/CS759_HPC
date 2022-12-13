@@ -96,3 +96,6 @@ FinalProject759/external/*
 
 mc_cpu
 mc_gpu
+backup
+backup.cu
+backup_run.sh
