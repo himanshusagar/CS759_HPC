@@ -6,6 +6,7 @@
 #include "cuda.h"
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+#include <curand.h>
 
 struct UnitGPUTime
 {
@@ -56,23 +57,41 @@ struct UnitCPUTime
   } \
 } while(0)
 
-static void dump_to_file(const char *name, int timestep, const double *data, int count)
+// static void dump_to_file(const char *name, int timestep, const double *data, int count)
+// {
+//   char buffer[256];
+//   sprintf(buffer, "%s-%d.bin", name, timestep);
+//   FILE *file = fopen(buffer, "wb");
+//   if( !file ) 
+//   {
+//     fprintf(stderr, "Error cannot open file %s\n", buffer);
+//     exit(1);
+//   }
+//   printf("> Debug info          : Writing %s to binary file %s\n", name, buffer);
+//   if( count != fwrite(data, sizeof(double), count, file) )
+//   {
+//     fprintf(stderr, "Error when dumping the binary values to %s\n", buffer);
+//     exit(1);
+//   }
+//   fclose(file);
+// }
+
+
+// Source : https://docs.nvidia.com/cuda/curand/host-api-overview.html#host-api-overview
+static double* gen_host_random_samples(int n_size)
 {
-  char buffer[256];
-  sprintf(buffer, "%s-%d.bin", name, timestep);
-  FILE *file = fopen(buffer, "wb");
-  if( !file ) 
-  {
-    fprintf(stderr, "Error cannot open file %s\n", buffer);
-    exit(1);
-  }
-  printf("> Debug info          : Writing %s to binary file %s\n", name, buffer);
-  if( count != fwrite(data, sizeof(double), count, file) )
-  {
-    fprintf(stderr, "Error when dumping the binary values to %s\n", buffer);
-    exit(1);
-  }
-  fclose(file);
+  double *h_vec = new double[n_size];
+  curandGenerator_t gen;
+  CHECK_CURAND(curandCreateGeneratorHost(&gen, CURAND_RNG_PSEUDO_MRG32K3A));
+  CHECK_CURAND(curandSetPseudoRandomGeneratorSeed(gen, 12354ULL));
+  CHECK_CURAND(curandGenerateNormalDouble(gen, h_vec, n_size, 0.0, 1.0));
+  CHECK_CURAND(curandDestroyGenerator(gen));
+  return h_vec;
+}
+
+static double payOffOverS(double value, const double payoff)
+{
+  return std::max(value - payoff, 0.0);
 }
 
 #endif //PROFILE_H
