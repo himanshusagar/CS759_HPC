@@ -13,7 +13,7 @@ static double isEarnMoney(double value, const double strike_price) {
     return value > strike_price;
 }
 
-static double longstaff_schwartz_cpu(const Params &param) {
+static double cpu_version(const Params &param) {
     // HOST: generate random values
     size_t simulation_size = param.n_timestamp * param.n_paths;
     double *host_random_input = gen_host_random_samples(simulation_size);
@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
     param.pretty_print();
     {
         UnitCPUTime c;
-        price = longstaff_schwartz_cpu(param);
+        price = cpu_version(param);
         printf("CPU Longstaff-Schwartz: %.8lf\n", price);
     }
 
