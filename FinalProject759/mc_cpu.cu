@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "cpu_utils.cuh"
+#include "utils.cuh"
 
 //LAPACK : Weird way to call its functions
 extern "C" void
