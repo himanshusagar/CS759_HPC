@@ -12,6 +12,12 @@ rm mc_cpu
 rm mc_gpu
 
 module load nvidia/cuda
-nvcc mc_cpu.cu -Xcompiler -O3 -Xcompiler -Wall -Xptxas -O3 -std c++17 -o mc_cpu -llapack -lblas -lm -lcurand -lgfortran -Xcompiler -Lexternal/lapack-3.11.0  -Xcompiler -Lexternal/BLAS-3.11.0 
-./mc_cpu
+nvcc mc_cpu.cu -Xcompiler -O3 -Xcompiler -Wall -Xptxas -O3 -std c++17 -o mc_cpu -llapack -lblas -lm -lcurand -lgfortran -Xcompiler -Lexternal/lapack-3.11  -Xcompiler -Lexternal/BLAS-3.11.0 
 
+begin=$((100))
+end=$((1000))
+
+for (( i=$begin ; i<=$end ; i=i+100 )); 
+do
+   ./mc_cpu $i
+done

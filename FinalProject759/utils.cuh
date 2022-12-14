@@ -7,6 +7,10 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include <curand.h>
+#include <string>  
+
+using std::cout;
+using std::endl;
 
 struct UnitGPUTime
 {
@@ -23,7 +27,7 @@ struct UnitGPUTime
         cudaEventSynchronize(stop);
         float ms = 0;
         cudaEventElapsedTime(&ms, start, stop);
-        return ms;
+        return ms / 1000.0;
     }
 };
 
@@ -34,8 +38,8 @@ struct UnitCPUTime
     ~UnitCPUTime()
     {
         auto d = std::chrono::high_resolution_clock::now() - begin;
-        float countValue = std::chrono::duration_cast<std::chrono::microseconds>(d).count();
-        std::cout << countValue/1000 << std::endl;
+        float countValue = std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
+        std::cout << countValue/1000;
     }
 };
 

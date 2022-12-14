@@ -152,20 +152,23 @@ int main(int argc, char **argv) {
     double T = 1.00;
     double price = 0.0;
 
+    int timestamp = std::stoi(argv[1]);
+
     Params param;
-    param.n_timestamp = 100;
-    param.n_paths = 32 * 1024;
+    param.n_timestamp = timestamp;
+    param.n_paths = 128 * 1024;
     param.S0 = 3.60;
     param.strike_price = 4.00;
     param.dt = T / param.n_timestamp;
-    param.R = 0.06;;
-    param.sigma = 0.20;;
-    param.pretty_print();
+    param.R = 0.06;
+    param.sigma = 0.2;
+
+    //param.pretty_print();
+    std::cout << timestamp << ", ";
     {
         UnitCPUTime c;
         price = cpu_version(param);
-        printf("CPU Longstaff-Schwartz: %.8lf\n", price);
     }
-
+    std::cout << ", " << price << std::endl;
     return 0;
 }

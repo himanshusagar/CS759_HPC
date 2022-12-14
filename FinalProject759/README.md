@@ -9,8 +9,8 @@
 mkdir -p external
 cd external
 wget https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v3.11.tar.gz
-tar -xvf lapack-3.11.0.tar.gz
-cd lapack-3.11.0/
+tar -xvf v3.11.tar.gz
+cd lapack-3.11/
 cp make.inc.example make.inc  # use example make as make
 make
 ```

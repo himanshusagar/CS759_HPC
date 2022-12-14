@@ -6,20 +6,14 @@
 #include <cub/cub.cuh>
 
 #define R_W_MATRICES_SMEM_SLOTS 12
+#define HOST_DEVICE        
 
-#define HOST_DEVICE        __host__ __device__
-#define HOST_DEVICE_INLINE __host__ __device__ __forceinline__
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-HOST_DEVICE_INLINE double3 operator+(const double3 &u, const double3 &v )
+__host__ __device__ double3 operator+(const double3 &u, const double3 &v )
 {
   return make_double3(u.x+v.x, u.y+v.y, u.z+v.z);
 }
 
-// ====================================================================================================================
-
-HOST_DEVICE_INLINE double4 operator+(const double4 &u, const double4 &v )
+__host__ __device__ double4 operator+(const double4 &u, const double4 &v )
 {
   return make_double4(u.x+v.x, u.y+v.y, u.z+v.z, u.w+v.w);
 }

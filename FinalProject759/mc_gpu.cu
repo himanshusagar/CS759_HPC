@@ -163,30 +163,33 @@ static void gpu_version(const Params &param, double *h_price)
 int main(int argc, char **argv) 
 {
 
+  int timestamp = std::stoi(argv[1]);
+
     double T = 1.00;
 
     Params param;
-    param.n_timestamp = 100;
-    param.n_paths = 32 * 1024;
+    param.n_timestamp = timestamp;
+    param.n_paths = 16 * 1024;
     param.S0 = 3.60;
     param.strike_price = 4.00;
     param.dt = T / param.n_timestamp;
-    param.R = 0.06;;
-    param.sigma = 0.20;;
-    param.pretty_print();
+    param.R = 0.06;
+    param.sigma = 0.2;
+    //param.pretty_print();
 
     // The price on the host.
   double *h_price = NULL;
   cudaHostAlloc((void**) &h_price, sizeof(double), cudaHostAllocDefault);
 
     float time = 0;
+    std::cout << timestamp << ", ";
     {
         UnitGPUTime g;
         gpu_version(param, h_price);
         time = g.getTime();
-        printf("GPU Longstaff-Schwartz: %.8lf\n", *h_price);
+        //printf("GPU Longstaff-Schwartz: %.8lf\n", *h_price);
     }
-    printf("%f\n", time);
+    cout << time << ", " << endl;
 
     return 0;
 }
