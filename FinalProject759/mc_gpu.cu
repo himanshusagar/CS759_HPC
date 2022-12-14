@@ -130,14 +130,16 @@ int main(int argc, char **argv)
 {
 
     double T = 1.00;
+
     Params param;
     param.n_timestamp = 100;
     param.n_paths = 32 * 1024;
-    param.S0 = 3.60;
-    param.strike_price = 4.00;
+    param.S0 = 4.50;
+    param.strike_price = 5.00;
     param.dt = T / param.n_timestamp;
-    param.R = 0.06;
+    param.R = 0.05;
     param.sigma = 0.2;
+
     param.pretty_print();
 
     // The price on the host.

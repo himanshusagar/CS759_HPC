@@ -101,13 +101,14 @@ public:
 
   void pretty_print()
   {
-    printf("==============\n");
-    printf("Num Timesteps         : %d\n",  n_timestamp);
-    printf("Num Paths             : %dK\n", n_paths / 1024);
-    printf("S0                    : %lf\n", S0);
-    printf("K                     : %lf\n", strike_price);
-    printf("R                     : %lf\n", R);
-    printf("sigma                 : %lf\n", sigma);
+    std::cout 
+    << "\n N Paths " << n_paths / 1024
+    << "\n Time Steps " << n_timestamp 
+    << "\n K " << strike_price 
+    << "\n R " << R
+    << "\n Sigma " << sigma
+    << "\n S0 " << S0
+    << std::endl;
   }
 };
 
