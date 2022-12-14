@@ -33,7 +33,7 @@ __global__ void generate_paths_kernel(int n_timestamp,
                                       double sigma,
                                       const double *samples,
                                       double *paths) {
-    int path = blockIdx.x * blockDim.x + threadIdx.x;
+    int path = blockIdx.x * 256 + threadIdx.x;
 
     if (path >= n_paths)
         return;
@@ -111,7 +111,7 @@ __global__ void prepare_svd_kernel(int num_paths,
             S = paths[offset + path];
 
 // Check if it pays off.
-        const int in_the_money = isEarnMoney(S, strike_price);
+        const int in_the_money = S > strike_price;
 
 // Try to check if we have found the 3 first stocks.
         if (found_paths < 3) {
@@ -430,7 +430,7 @@ __global__  void compute_partial_beta_kernel(int num_paths,
     double S = paths[path];
 
     // Is the path in the money?
-    const int in_the_money = isEarnMoney(S , strike_price);
+    const int in_the_money = S > strike_price;
 
     // Compute Qis. The elements of the Q matrix in the QR decomposition.
     double Q1i = inv_R11*S - inv_R01;

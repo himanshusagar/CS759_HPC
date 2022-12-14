@@ -27,7 +27,7 @@ static void gpu_version(const Params &param, double *h_price)
     int grid_dim;
     // HOST: generate random values
     size_t simulation_size = param.n_timestamp * param.n_paths;
-    double *host_random_input = gen_host_random_samples(simulation_size , true);
+    double *d_samples = gen_host_random_samples(simulation_size , true);
 
     double *d_paths = NULL;
     cudaMalloc( (void**) &d_paths, param.n_timestamp *  param.n_paths * sizeof(double) ) ;
@@ -52,7 +52,7 @@ static void gpu_version(const Params &param, double *h_price)
         param.S0, 
         param.R, 
         param.sigma, 
-        host_random_input,
+        d_samples,
         d_paths);
     CHECK_CUDA(cudaGetLastError());
 
@@ -62,11 +62,14 @@ static void gpu_version(const Params &param, double *h_price)
     int *d_all_out_of_the_money = NULL;
     CHECK_CUDA(cudaMallocManaged( (void**)&d_all_out_of_the_money , param.n_timestamp * sizeof(float) ) );
 
+      // Reset the all_out_of_the_money array.
+    CHECK_CUDA(cudaMemsetAsync(d_all_out_of_the_money, 0, param.n_timestamp * sizeof(int)));
+ 
     double *d_svds = NULL;
     CHECK_CUDA(cudaMallocManaged( (void**)&d_svds, 16 * param.n_timestamp * sizeof(double)));
 
     const int NUM_THREADS_PER_BLOCK1 = 256;
-    prepare_svd_kernel< NUM_THREADS_PER_BLOCK1 ><<< ret.first , ret.second >>>(
+    prepare_svd_kernel< NUM_THREADS_PER_BLOCK1 ><<< param.n_timestamp-1 , NUM_THREADS_PER_BLOCK1 >>>(
         param.n_paths,
         4, 
         param.strike_price, 

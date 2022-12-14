@@ -4,6 +4,41 @@
 
 #include "utils.cuh"
 
+static double* gen_host_paths(const Params& param, const double *host_random_input)
+{
+    size_t simulation_size = param.n_timestamp * param.n_paths;
+
+    double *host_paths = new double[simulation_size];
+    const double A = (param.R - 0.5f * param.sigma * param.sigma) * param.dt;
+    const double B = param.sigma * sqrt(param.dt);
+
+    int i_timestamp = 0;
+    while(i_timestamp < param.n_timestamp)
+    {
+        int i_path = 0;
+        while( i_path < param.n_paths )
+        {
+            double S = 0;
+            if(i_timestamp == 0)
+                S = param.S0;
+            else 
+                S = host_paths[ (i_timestamp - 1) * param.n_paths + i_path ];
+                
+            S = S * exp( A + B * host_random_input[ i_timestamp * param.n_paths + i_path ] );
+
+            if(i_timestamp < param.n_timestamp - 1)
+                host_paths[ i_timestamp * param.n_paths + i_path] = S;
+            else
+                host_paths[ i_timestamp * param.n_paths + i_path] = payOffOverS(S , param.strike_price);
+
+            i_path++;
+        }
+        i_timestamp++;
+    }
+    return host_paths;
+
+}
+
 //LAPACK : Weird way to call its functions
 extern "C" void
 dgesvd_(char *, char *, long *, long *, double *, long *, double *, double *, long *, double *, long *, double *,
@@ -32,7 +67,7 @@ static double cpu_version(const Params &param) {
 
         for (int i = 0; i < param.n_paths; ++i) {
             double S = host_paths[timestep * param.n_paths + i];
-            if (!isEarnMoney(S, param.strike_price))
+            if ( !(S > param.strike_price) )
                 continue;
 
             h_matrix[0 * param.n_paths + m] = 1.0;
@@ -80,7 +115,7 @@ static double cpu_version(const Params &param) {
         double beta0 = 0.0, beta1 = 0.0, beta2 = 0.0;
         for (int i = 0, k = 0; i < param.n_paths; ++i) {
             double S = host_paths[timestep * param.n_paths + i];
-            if (!isEarnMoney(S, param.strike_price))
+            if ( !( S > param.strike_price ) ) 
                 continue;
 
             double cashflow = h_cashflows[i];
