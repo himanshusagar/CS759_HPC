@@ -13,13 +13,8 @@ rm mc_gpu
 module load nvidia/cuda
 nvcc mc_gpu.cu -Xcompiler -O3 -Xcompiler -Wall -Xptxas -O3 -std c++17 -o mc_gpu -lcurand 
 
-begin=$((100))
-end=$((1000))
+./mc_gpu
 
-for (( i=$begin ; i<=$end ; i=i+100 )); 
-do
-   ./mc_gpu $i
-done
 
 
 
