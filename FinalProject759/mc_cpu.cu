@@ -166,6 +166,6 @@ int main(int argc, char **argv) {
         UnitCPUTime c;
         price = cpu_version(param);
     }
-    std::cout << ", " << price << std::endl;
+    std::cout << "\n CPU Price: " << price << std::endl;
     return 0;
 }

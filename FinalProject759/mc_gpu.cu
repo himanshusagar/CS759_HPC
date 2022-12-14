@@ -152,9 +152,7 @@ int main(int argc, char **argv)
         UnitGPUTime g;
         gpu_version(param, h_price);
         time = g.getTime();
-        printf("GPU Longstaff-Schwartz: %.8lf\n", *h_price);
+        std::cout << "Time: " << time << " GPU Price: " << *h_price << std::endl;
     }
-    cout << time << ", " << endl;
-
     return 0;
 }
