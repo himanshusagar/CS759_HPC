@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-git clone https://git.doit.wisc.edu/HSAGAR2/repo759
+git clone git@git.doit.wisc.edu:HSAGAR2/repo759.git
 cd repo759
 cd FinalProject759
 

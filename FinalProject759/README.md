@@ -1,8 +1,14 @@
 # Monte Carlo Simulations in Option Pricing
 
-### Formulation
 
-### Steps to build code
+#### How to clone repo
+```shell
+git clone git@git.doit.wisc.edu:HSAGAR2/repo759.git
+cd repo759
+cd FinalProject759
+```
+
+### Steps to run CPU code
 #### 1. Install lapack
 
 ```shell
@@ -31,12 +37,17 @@ mv blas_LINUX.a libblas.a
 ```shell
 bash cpu_run.sh
 ```
+### Steps to run GPU code
+#### 1. Run gpu_run.sh
+```shell
+bash gpu_run.sh
+```
 
-## Combined Scripts
+## Combined shell scripts to run cpu and gpu code
 ```shell
 #!/usr/bin/env zsh
 
-git clone https://git.doit.wisc.edu/HSAGAR2/repo759
+git clone git@git.doit.wisc.edu:HSAGAR2/repo759.git
 cd repo759
 cd FinalProject759
 
